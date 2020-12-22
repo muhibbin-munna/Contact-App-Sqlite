@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".ContactListFragment">
+
+    <TextView
+        android:id="@+id/noContactDisplay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        android:textSize="24sp"
+        android:gravity="center"/>
+    <in.myinnos.alphabetsindexfastscrollrecycler.IndexFastScrollRecyclerView
+        android:id="@+id/fast_scroller_recycler"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/search"/>
+
+    <androidx.appcompat.widget.SearchView
+        android:id="@+id/search"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        app:iconifiedByDefault="false"
+        app:queryHint="@string/search_contact"
+        android:layout_marginEnd="60dp"
+        android:layout_alignParentBottom="true"
+        />
+
+
+</RelativeLayout>

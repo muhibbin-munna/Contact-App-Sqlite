@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+    <androidx.cardview.widget.CardView
+        android:id="@+id/card_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:elevation="10dp"
+        card_view:cardCornerRadius="30dp"
+        android:paddingStart="10dp"
+        android:layout_margin="8dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp">
+
+            <LinearLayout
+                android:id="@+id/detailsLL"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="5dp"
+                android:paddingBottom="5dp"
+                android:background="@drawable/remarkbg">
+
+                <TextView
+                    android:id="@+id/descriptionTv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:text="Description" />
+
+                <TextView
+                    android:id="@+id/remark1Tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Remark 1" />
+
+                <TextView
+                    android:id="@+id/remark2Tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Remark 2" />
+
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/secondLL"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/detailsLL"
+                android:orientation="horizontal"
+                android:layout_marginBottom="5dp"
+                android:paddingBottom="5dp"
+                android:background="@drawable/remarkbg">
+
+                <TextView
+                    android:id="@+id/dateTv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="10dp"
+                    android:text="Date Commencing:                      " />
+
+                <TextView
+                    android:id="@+id/statusTv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Status                      " />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_below="@+id/secondLL">
+                <ImageButton
+                    android:id="@+id/notifyCB"
+                    android:layout_width="20dp"
+                    android:layout_height="wrap_content"
+                    android:background="@null"
+                    android:layout_marginEnd="5dp"
+                    android:src="@drawable/notification"
+                    android:text="Notify"
+                    />
+
+                <CheckBox
+                    android:id="@+id/enableCB"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Enable"
+                    android:textSize="10sp"
+                    android:layoutDirection="rtl"
+                    android:enabled="false"
+                    android:textColor="@color/iconColor"
+                    android:buttonTint="@color/iconColor"
+                    android:textColorHighlight="@color/iconColor"/>
+                <TextView
+                    android:id="@+id/alarmDateTv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Date: "
+                    android:layout_weight="1"/>
+                <TextView
+                    android:id="@+id/alarmTimeTv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Time: "
+                    android:layout_weight="1"/>
+            </LinearLayout>
+        </RelativeLayout>
+
+    </androidx.cardview.widget.CardView>
+</LinearLayout>

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="5dp"
+            android:paddingEnd="5dp">
+
+            <LinearLayout
+                android:id="@+id/detailsLL"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="5dp"
+                android:paddingBottom="5dp"
+                android:background="@drawable/remarkbg">
+
+                <EditText
+                    android:id="@+id/edit_des"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@null"
+                    android:hint="Description" />
+
+                <EditText
+                    android:id="@+id/edit_remark1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="Remark 1"
+                    android:background="@null"/>
+
+                <EditText
+                    android:id="@+id/edit_remark2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="Remark 2"
+                    android:background="@null"/>
+
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/secondLL"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/detailsLL"
+                android:orientation="horizontal"
+                android:layout_marginBottom="5dp"
+                android:paddingBottom="5dp"
+                android:background="@drawable/remarkbg">
+
+                <EditText
+                    android:id="@+id/edit_date"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="10dp"
+                    android:hint="Date Commencing: "
+                    android:layout_weight="1"
+                    android:background="@null"/>
+
+                <EditText
+                    android:id="@+id/edit_status"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="Status "
+                    android:background="@null"/>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_below="@+id/secondLL">
+                <ImageButton
+                    android:id="@+id/notifyCB"
+                    android:layout_width="20dp"
+                    android:layout_height="wrap_content"
+                    android:background="@null"
+                    android:layout_marginEnd="5dp"
+                    android:src="@drawable/notification"
+                    android:text="Notify"
+                    />
+
+                <CheckBox
+                    android:id="@+id/enableCB"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Enable"
+                    android:textSize="10sp"
+                    android:layoutDirection="rtl"/>
+                <TextView
+                    android:id="@+id/alarmDateTv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Date: "
+                    android:layout_weight="1"/>
+                <TextView
+                    android:id="@+id/alarmTimeTv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Time: "
+                    android:layout_weight="1"/>
+            </LinearLayout>
+        </RelativeLayout>
+</LinearLayout>

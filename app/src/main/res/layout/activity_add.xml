@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/bottomLL"
+        android:overScrollMode="never"
+        android:layout_alignParentTop="true">
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:gravity="center">
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <ImageView
+                    android:id="@+id/imageButtonAdd"
+                    android:layout_width="150dp"
+                    android:layout_height="150dp"
+                    android:src="@drawable/contacts_icon"
+                    android:layout_gravity="center"
+                    android:layout_margin="20dp"/>
+            </androidx.cardview.widget.CardView>
+
+
+            <EditText
+                android:hint="Full name"
+                android:id="@+id/fullNameEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <EditText
+                android:layout_marginTop="5dp"
+                android:inputType="number"
+                android:hint="Phone number"
+                android:id="@+id/phoneNoEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                >
+                <TextView
+                    android:id="@+id/gender"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint=" Gender"
+                    android:layout_weight="1"
+                    android:textSize="18sp"
+                    />
+
+                <Spinner
+                    android:id="@+id/genderSpinnerId"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:entries="@array/gender"
+                    android:layout_weight="1"
+
+                    />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                >
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint=" Date of Birth "
+                    android:layout_weight="1"
+                    android:layout_gravity="center"
+                    android:textSize="18sp"
+                    android:id="@+id/dob_tv"
+                    />
+
+<!--                <DatePicker-->
+<!--                    android:id="@+id/datePickerId"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="86dp"-->
+<!--                    android:calendarViewShown="false"-->
+<!--                    android:datePickerMode="spinner"-->
+<!--                    android:spinnersShown="true"-->
+<!--                    android:layout_weight="1" />-->
+                <ImageButton
+                    android:id="@+id/dateButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/image_button_bg"
+                    android:src="@drawable/ic_calendar"
+                    android:padding="12dp"
+                    />
+            </LinearLayout>
+            <EditText
+                android:layout_marginTop="5dp"
+                android:inputType="textPostalAddress"
+                android:hint="Address ( Line 1) "
+                android:id="@+id/addressLine1EditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <EditText
+                android:layout_marginTop="5dp"
+                android:inputType="textPostalAddress"
+                android:hint="Address ( Line 2) "
+                android:id="@+id/addressLine2EditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <EditText
+                android:layout_marginTop="5dp"
+                android:inputType="textPostalAddress"
+                android:hint="City"
+                android:id="@+id/cityEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <EditText
+                android:layout_marginTop="5dp"
+                android:inputType="textPostalAddress"
+                android:hint="Post Code"
+                android:id="@+id/postCodeEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <EditText
+                android:id="@+id/remarkEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:hint="Remark"
+                android:inputType="textPostalAddress" />
+
+        </LinearLayout>
+    </ScrollView>
+
+
+
+    <LinearLayout
+        android:id="@+id/bottomLL"
+        android:layout_alignParentBottom="true"
+        android:layout_marginTop="15dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <Button
+            android:layout_weight="0.5"
+            android:onClick="save"
+            android:textColor="#fff"
+            android:background="#47b12d "
+            android:textStyle="bold"
+            android:textSize="20dp"
+            android:text="Save"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <Button
+            android:layout_weight="0.5"
+            android:onClick="cancel"
+            android:textColor="#fff"
+            android:background="#ef4416"
+            android:textStyle="bold"
+            android:textSize="20dp"
+            android:text="Cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+</RelativeLayout>

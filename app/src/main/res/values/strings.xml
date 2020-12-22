@@ -1,0 +1,25 @@
+<resources>
+    <string name="app_name">FinCard</string>
+    <array name="gender">
+        <item>Male</item>
+        <item>Female</item>
+        <item>Others</item>
+    </array>
+    <string name="notification_area">NOTIFICATION AREA\n
+        (DISPLAY CONTACT NAME+DESCRIPTON+DATE+STATUS)\n
+        (CLICKABLE TO DISPLAY FULL DETAIL AND EDIT)\n
+        (SCROLL UP AREA)\n
+        (NOTIFICATION REMAIN APPEARED UNTIL DATE OR NOTIFY CHECK BOX AMEND)\n
+        (AUTO SORT TO THE OLDEST NOTIFICATION APPEARED)\n
+        (NO NEW NOTIFICATION ON DEFAULT)\n
+    </string>
+    <string name="contact_area">
+        SHOW ALL CONTACT AND SEARCHED RESULT HERE\n\n
+        (CLICKABLE TO DISPLAY FULL DETAIL AND EDIT)\n
+        (SCROLL UP ARE)\n
+    </string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="search_contact">Search Name / Phone Number</string>
+    <string name="db_name">contacts.db</string>
+</resources>

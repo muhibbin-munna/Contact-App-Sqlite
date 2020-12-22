@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/scrollView2"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:overScrollMode="never"
+    tools:context=".MainActivity">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:focusableInTouchMode="true"
+        android:orientation="vertical"
+        >
+
+        <RelativeLayout
+            android:id="@+id/main1L"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:orientation="horizontal"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp">
+
+            <Button
+                android:id="@+id/menu"
+                android:layout_width="22dp"
+                android:layout_height="25dp"
+                android:layout_alignParentEnd="true"
+                android:layout_marginStart="7dp"
+                android:background="@drawable/ic_menu"
+                android:scaleType="fitXY" />
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/ppCardView"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginEnd="20dp"
+                android:shape="ring"
+                app:cardCornerRadius="40dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                >
+
+                <ImageView
+                    android:id="@+id/ppImageView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/contacts_icon"
+                    android:layout_gravity="center" />
+
+            </androidx.cardview.widget.CardView>
+            <com.app.contactappsp.EditTextV2
+                android:id="@+id/nameEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="5dp"
+                android:layout_toStartOf="@id/menu"
+                android:layout_toEndOf="@+id/ppCardView"
+                android:background="@null"
+                android:gravity="center"
+                android:imeOptions="actionDone"
+                android:inputType="textMultiLine|textNoSuggestions"
+                android:padding="5dp"
+                android:text="Enter Name"
+                android:textSize="14sp" />
+
+            <com.app.contactappsp.EditTextV2
+                android:id="@+id/remarkEditText1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/nameEditText"
+                android:layout_marginBottom="5dp"
+                android:layout_toStartOf="@id/menu"
+                android:layout_toEndOf="@+id/ppCardView"
+                android:background="@null"
+                android:ems="10"
+                android:gravity="center"
+                android:imeOptions="actionDone"
+                android:inputType="textMultiLine|textNoSuggestions"
+                android:padding="5dp"
+                android:text="Remark"
+                android:textSize="14sp" />
+
+            <com.app.contactappsp.EditTextV2
+                android:id="@+id/remarkEditText2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/remarkEditText1"
+                android:layout_marginBottom="5dp"
+                android:layout_toStartOf="@id/menu"
+                android:layout_toEndOf="@+id/ppCardView"
+                android:background="@null"
+                android:ems="10"
+                android:gravity="center"
+                android:imeOptions="actionDone"
+                android:inputType="textMultiLine|textNoSuggestions"
+                android:padding="5dp"
+                android:text="Remark"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/no_of_contact"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/remarkEditText2"
+                android:layout_marginBottom="5dp"
+                android:layout_toStartOf="@id/menu"
+                android:layout_toEndOf="@+id/ppCardView"
+                android:gravity="center"
+                android:background="@null"
+                android:padding="5dp"
+                android:text="0 contacts "
+                android:textSize="14sp" />
+
+
+        </RelativeLayout>
+
+
+        <LinearLayout
+            android:id="@+id/main2L"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/main1L"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="15dp"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="visible">
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                app:cardCornerRadius="8dp"
+
+                >
+                <TextView
+                    android:id="@+id/textView3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginEnd="20dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:padding="5dp"
+                    android:text="Notifications"
+                    android:textSize="14sp"
+                    android:layout_gravity="center"
+                     />
+            </androidx.cardview.widget.CardView>
+            <FrameLayout
+                android:id="@+id/remarkFrame"
+                android:layout_width="match_parent"
+                android:layout_height="300dp"
+                />
+        </LinearLayout>
+
+
+
+        <LinearLayout
+            android:id="@+id/main3L"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/main2L"
+            android:orientation="vertical"
+            android:visibility="visible"
+            android:gravity="center">
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                app:cardCornerRadius="8dp"
+
+                >
+                <TextView
+                    android:id="@+id/textView8"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginEnd="20dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:padding="5dp"
+                    android:text="Contacts"
+                    android:textSize="14sp"
+                    android:layout_gravity="center"
+                    />
+            </androidx.cardview.widget.CardView>
+
+
+
+
+
+            <FrameLayout
+                android:id="@+id/contactFrame"
+                android:layout_width="match_parent"
+                android:layout_height="400dp"
+                android:layout_marginTop="5dp"
+                />
+        </LinearLayout>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/addContactFabButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            app:fabCustomSize="50dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginEnd="5dp"
+            android:layout_marginBottom="10dp"
+            android:src="@drawable/ic_baseline_add_24"
+            tools:ignore="ContentDescription" />
+    </RelativeLayout>
+</androidx.core.widget.NestedScrollView>
