@@ -18,11 +18,12 @@ import android.util.Base64;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -46,10 +47,11 @@ public class UpdateContact extends AppCompatActivity implements DatePickerDialog
     private String userChoosenTask;
     private int REQUEST_CAMERA = 0, SELECT_FILE = 1;
     Spinner genderSpinnerText;
-    //    DatePicker datePicker;
-    Button dateButton;
+    ImageButton dateButton;
     int day, month, year;
-    String daystr="", monthstr="", yearstr="";
+    TextView dobtv;
+    String dob = "";
+    String[] monthName = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -58,7 +60,6 @@ public class UpdateContact extends AppCompatActivity implements DatePickerDialog
 
         fullName = findViewById(R.id.fullNameEditTextUpdate);
         phone = findViewById(R.id.phoneNoEditTextUpdate);
-//        datePicker = findViewById(R.id.datePickerId);
         genderSpinnerText = findViewById(R.id.genderSpinnerId);
         address1 = findViewById(R.id.addressLine1EditTextUpdate);
         address2 = findViewById(R.id.addressLine2EditTextUpdate);
@@ -66,6 +67,7 @@ public class UpdateContact extends AppCompatActivity implements DatePickerDialog
         postCode = findViewById(R.id.postCodeEditTextUpdate);
         remark = findViewById(R.id.remarkEditTextUpdate);
         imageButton = findViewById(R.id.imageButtonUpdate);
+        dobtv = findViewById(R.id.dob_tv_update);
         dateButton = findViewById(R.id.dateButtonUpdate);
         getData();
 
@@ -79,13 +81,7 @@ public class UpdateContact extends AppCompatActivity implements DatePickerDialog
         dateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                Calendar calendar = Calendar.getInstance();
-//                year = calendar.get(Calendar.YEAR);
-//                month = calendar.get(Calendar.MONTH);
-//                day = calendar.get(Calendar.DAY_OF_MONTH);
-//                DatePickerDialog datePickerDialog = new DatePickerDialog(AddActivity.this,android.R.style.Theme_Holo_Light_Dialog, AddActivity.this, year, month, day);
-//                datePickerDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                DatePickerDialog datePickerDialog = new DatePickerDialog(UpdateContact.this,UpdateContact.this, year, month, day);
+                DatePickerDialog datePickerDialog = new DatePickerDialog(UpdateContact.this, UpdateContact.this, year, month, day);
                 datePickerDialog.show();
             }
         });
@@ -170,7 +166,7 @@ public class UpdateContact extends AppCompatActivity implements DatePickerDialog
     }
 
     private void selectImage() {
-        final CharSequence[] items = {"Remove Photo","Take Photo", "Choose from Library",
+        final CharSequence[] items = {"Remove Photo", "Take Photo", "Choose from Library",
                 "Cancel"};
 
         AlertDialog.Builder builder = new AlertDialog.Builder(UpdateContact.this);
@@ -185,10 +181,9 @@ public class UpdateContact extends AppCompatActivity implements DatePickerDialog
                     if (result)
                         cameraIntent();
 
-                }else if (items[item].equals("Remove Photo")) {
+                } else if (items[item].equals("Remove Photo")) {
                     userChoosenTask = "Remove Photo";
-                    if (result)
-                    {
+                    if (result) {
                         imageButton.setImageResource(R.drawable.contacts_icon);
                     }
 
@@ -226,6 +221,7 @@ public class UpdateContact extends AppCompatActivity implements DatePickerDialog
         return super.onOptionsItemSelected(item);
     }
 
+    @SuppressLint("SetTextI18n")
     public void getData() {
         Intent intent = getIntent();
         int id = intent.getIntExtra("updateContact", 0);
@@ -250,7 +246,6 @@ public class UpdateContact extends AppCompatActivity implements DatePickerDialog
                 contact.setPostCode(cursor.getString(8));
                 contact.setRemark(cursor.getString(9));
                 contact.setImage(cursor.getString(10));
-
                 contacts.add(contact);
 
             } while (cursor.moveToNext());
@@ -260,25 +255,20 @@ public class UpdateContact extends AppCompatActivity implements DatePickerDialog
         phone.setText(contact.getPhone());
         String[] baths = getResources().getStringArray(R.array.gender);
         genderSpinnerText.setSelection(Arrays.asList(baths).indexOf(contact.getGender().trim()));
-        String date = contact.getAge();
-        if(!date.trim().equals("")) {
-            daystr = "" + date.charAt(0) + date.charAt(1);
-            monthstr = "" + date.charAt(2) + date.charAt(3);
-            yearstr = "" + date.charAt(4) + date.charAt(5) + date.charAt(6) + date.charAt(7);
-            day = Integer.parseInt(daystr);
-            month = Integer.parseInt(monthstr)-1;
-            year = Integer.parseInt(yearstr);
-        }
-        else {
+        dob = contact.getAge();
+        if (!dob.trim().equals("")) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(Long.parseLong(dob));
+            year = calendar.get(Calendar.YEAR);
+            month = calendar.get(Calendar.MONTH);
+            day = calendar.get(Calendar.DAY_OF_MONTH);
+            dobtv.setText(day + " " + monthName[month] + " " + (year % 100));
+        } else {
             Calendar calendar = Calendar.getInstance();
             year = calendar.get(Calendar.YEAR);
             month = calendar.get(Calendar.MONTH);
             day = calendar.get(Calendar.DAY_OF_MONTH);
         }
-
-
-
-//        datePicker.updateDate(year, month - 1, day);
         address1.setText(contact.getAddress1());
         address2.setText(contact.getAddress2());
         city.setText(contact.getCity());
@@ -314,28 +304,12 @@ public class UpdateContact extends AppCompatActivity implements DatePickerDialog
         bm.compress(Bitmap.CompressFormat.PNG, 100, stream);
         byte[] arr1 = stream.toByteArray();
         String result = Base64.encodeToString(arr1, Base64.DEFAULT);
-//        int month = datePicker.getMonth() + 1;
-//        String daystr, monthstr;
-//        if (datePicker.getDayOfMonth() < 10) {
-//            daystr = "0" + datePicker.getDayOfMonth();
-//        } else {
-//            daystr = "" + datePicker.getDayOfMonth();
-//        }
-//        if (month < 10) {
-//            monthstr = "0" + month;
-//        } else {
-//            monthstr = "" + month;
-//        }
 
-
-        String date = "" + daystr + monthstr + yearstr;
-
-        Log.d("TAG", "save: " + date);
         ContentValues values = new ContentValues();
         values.put(DbHelper.COLUMN_2, fullName.getText().toString());
         values.put(DbHelper.COLUMN_3, phone.getText().toString());
         values.put(DbHelper.COLUMN_4, genderSpinnerText.getSelectedItem().toString());
-        values.put(DbHelper.COLUMN_5, date);
+        values.put(DbHelper.COLUMN_5, dob);
         values.put(DbHelper.COLUMN_6, address1.getText().toString());
         values.put(DbHelper.COLUMN_7, address2.getText().toString());
         values.put(DbHelper.COLUMN_8, city.getText().toString());
@@ -349,24 +323,11 @@ public class UpdateContact extends AppCompatActivity implements DatePickerDialog
 
     @SuppressLint("SetTextI18n")
     @Override
-    public void onDateSet(DatePicker view, int year, int monthhere, int dayOfMonth) {
-        month = monthhere+1;
-        if(dayOfMonth<10)
-        {
-            daystr = "0"+dayOfMonth;
-        }
-        else {
-            daystr = ""+dayOfMonth;
-        }
-        if(month<10)
-        {
-            monthstr = "0"+month;
-        }
-        else {
-            monthstr = ""+month;
-        }
-        yearstr = ""+year;
+    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
 
-        dateButton.setText(daystr+" / "+monthstr+" / "+yearstr);
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(year, month, dayOfMonth);
+        dob = String.valueOf(calendar.getTimeInMillis());
+        dobtv.setText(dayOfMonth + " " + monthName[month] + " " + (year % 100));
     }
 }

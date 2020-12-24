@@ -31,19 +31,20 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class ContactDetailsActivity extends AppCompatActivity implements View.OnClickListener, RemarkAdapter.OnItemClickListener {
     TextView fullName, phone, gender, age, address1, address2, city, postCode, remark;
-    ImageView imageView, notifyCB;
+    ImageView imageView;
     Contact contact;
     ImageButton call, message, mail;
     RecyclerView remarkRV;
     TextView event1, event2, event3;
     List<MyRemarkDetails> userList = new ArrayList<>();
-    MyRemarkDetails[] array = new MyRemarkDetails[20];
+    //    MyRemarkDetails[] array = new MyRemarkDetails[20];
     MyDatabaseHelper myDatabaseHelper;
     String TAG = "ContactDetailsActivity";
     int event = 1;
@@ -59,7 +60,7 @@ public class ContactDetailsActivity extends AppCompatActivity implements View.On
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_top);
         toolbar.setTitle("");
         setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null){
+        if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
@@ -85,26 +86,16 @@ public class ContactDetailsActivity extends AppCompatActivity implements View.On
 
         Intent intent = getIntent();
         event = intent.getIntExtra("event", 1);
-        pos = intent.getIntExtra("row", 1);
+//        pos = intent.getIntExtra("row", 1);
 
-//        enableCB.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                boolean checked = ((CheckBox) v).isChecked();
-//                if(checked){
-//                    v.setActivated();
-//                }
-//
-//            }
-//        });
         editTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 updateData();
             }
         });
-//        call =(ImageButton) findViewById(R.id.buttonCall);
-//        message =(ImageButton) findViewById(R.id.buttonMessage);
+        call = findViewById(R.id.buttonCall);
+        message = findViewById(R.id.buttonMessage);
 //        mail =(ImageButton) findViewById(R.id.buttonEmail);
 
         setData();
@@ -117,8 +108,7 @@ public class ContactDetailsActivity extends AppCompatActivity implements View.On
                     1);
         }
 
-        switch (event)
-        {
+        switch (event) {
             case 1:
                 event1.setBackgroundResource(R.drawable.edittextbg);
                 break;
@@ -139,7 +129,7 @@ public class ContactDetailsActivity extends AppCompatActivity implements View.On
 
     private void load(int i) {
         userList.clear();
-        array = new MyRemarkDetails[20];
+//        array = new MyRemarkDetails[20];
         Cursor cursor = myDatabaseHelper.read_event_2(String.valueOf(contact.getId()));
         if (i == 1) {
             cursor = myDatabaseHelper.read_event_1(String.valueOf(contact.getId()));
@@ -162,12 +152,24 @@ public class ContactDetailsActivity extends AppCompatActivity implements View.On
                 contactDetails.setNotify(cursor.getString(7));
                 contactDetails.setDate(cursor.getString(8));
                 contactDetails.setStatus(cursor.getString(9));
-                array[Integer.parseInt(cursor.getString(3))] = contactDetails;
+                userList.add(contactDetails);
+//                array[Integer.parseInt(cursor.getString(3))] = contactDetails;
             }
         }
-        userList.addAll(Arrays.asList(array).subList(0, 20));
-        Log.d(TAG, "load: "+userList.size());
+//        userList.addAll(Arrays.asList(array).subList(0, 20));
+        Log.d(TAG, "load: " + userList.size());
         cursor.close();
+        Collections.sort(
+                userList,
+                new Comparator<MyRemarkDetails>()
+                {
+                    public int compare(MyRemarkDetails lhs, MyRemarkDetails rhs)
+                    {
+                        return lhs.getDate().compareTo(rhs.getDate());
+                    }
+                }
+        );
+
         contactAdapter = new RemarkAdapter(userList, ContactDetailsActivity.this);
         remarkRV.setLayoutManager(new LinearLayoutManager(this));
         remarkRV.setAdapter(contactAdapter);
@@ -190,12 +192,16 @@ public class ContactDetailsActivity extends AppCompatActivity implements View.On
         }
         if (!contact.getAge().trim().equals("")) {
 
-            String date= contact.getAge();
-            int day = Integer.parseInt(""+ date.charAt(0)+date.charAt(1));
-            int month = Integer.parseInt(""+ date.charAt(2)+date.charAt(3));
-            int year = Integer.parseInt(""+ date.charAt(4)+date.charAt(5)+date.charAt(6)+date.charAt(7));
-            String ageStr = calculateAge(year,month-1,day);
-            age.setText(ageStr+" years");
+            String date = contact.getAge();
+            int day,month,year;
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(Long.parseLong(date));
+            day = calendar.get(Calendar.DAY_OF_MONTH);
+            month = calendar.get(Calendar.MONTH);
+            year = calendar.get(Calendar.YEAR);
+            String ageStr = calculateAge(year, month, day);
+            age.setText(ageStr + " years");
+            Log.d(TAG, "setData: "+date);
         }
         if (!contact.getAddress1().trim().equals("")) {
             address1.setText(contact.getAddress1());
@@ -223,20 +229,20 @@ public class ContactDetailsActivity extends AppCompatActivity implements View.On
 
     private String calculateAge(int year, int month, int day) {
 
-            Calendar dob = Calendar.getInstance();
-            Calendar today = Calendar.getInstance();
+        Calendar dob = Calendar.getInstance();
+        Calendar today = Calendar.getInstance();
 
-            dob.set(year, month, day);
+        dob.set(year, month, day);
 
-            int age = today.get(Calendar.YEAR) - dob.get(Calendar.YEAR);
+        int age = today.get(Calendar.YEAR) - dob.get(Calendar.YEAR);
 
-            if (today.get(Calendar.DAY_OF_YEAR) < dob.get(Calendar.DAY_OF_YEAR)){
-                age--;
-            }
+        if (today.get(Calendar.DAY_OF_YEAR) < dob.get(Calendar.DAY_OF_YEAR)) {
+            age--;
+        }
 
-            Integer ageInt = new Integer(age);
-            String ageS = ageInt.toString();
-            return ageS;
+        Integer ageInt = new Integer(age);
+        String ageS = ageInt.toString();
+        return ageS;
     }
 
     public Contact getData() {
@@ -288,7 +294,7 @@ public class ContactDetailsActivity extends AppCompatActivity implements View.On
         SQLiteDatabase db = helper.getWritableDatabase();
         int result = db.delete(DbHelper.TABLE_NAME, "ID=" + id, null);
         Log.v("TAG", "Contact deleted " + result + " " + id);
-        Toast.makeText(this, "Contact deleted " , Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Contact deleted ", Toast.LENGTH_SHORT).show();
         db.close();
         finish();
     }
@@ -308,7 +314,7 @@ public class ContactDetailsActivity extends AppCompatActivity implements View.On
 
     public void call(View view) {
         Contact contact = getData();
-        Intent intent1 = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:+88" + contact.getPhone()));
+        Intent intent1 = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + contact.getPhone()));
         startActivity(intent1);
         Log.v("Number", contact.getPhone());
     }
@@ -317,6 +323,23 @@ public class ContactDetailsActivity extends AppCompatActivity implements View.On
         Contact contact = getData();
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("sms:" + contact.getPhone()));
         startActivity(intent);
+    }
+
+    public void whatsapp(View view) {
+        try {
+            Contact contact = getData();
+            String toNumber = contact.getPhone(); // contains spaces
+            startActivity(
+                    new Intent(Intent.ACTION_VIEW,
+                            Uri.parse(
+                                    String.format("https://api.whatsapp.com/send?phone=%s&text=%s", toNumber, "")
+                            )
+                    )
+            );
+
+        } catch (Exception e) {
+            Toast.makeText(this, "could not find WhatsApp", Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override
@@ -399,47 +422,40 @@ public class ContactDetailsActivity extends AppCompatActivity implements View.On
     @Override
     public void setOnRemarkLongClickListener(int position) {
         pos = position;
-        if (userList.size() != 0) {
-            if (userList.get(position) != null) {
-                Intent intent = new Intent(ContactDetailsActivity.this, EditRemarkActivity.class);
-                intent.putExtra("has_data", "yes");
-                intent.putExtra("row_index", String.valueOf(position));
-                intent.putExtra("event",  String.valueOf(event));
-                intent.putExtra("contact_id",  String.valueOf(contact.getId()));
+        if (position < userList.size()) {
+            Intent intent = new Intent(ContactDetailsActivity.this, EditRemarkActivity.class);
+            intent.putExtra("has_data", "yes");
+            intent.putExtra("row_index", String.valueOf(position));
+            intent.putExtra("event", String.valueOf(event));
+            intent.putExtra("contact_id", String.valueOf(contact.getId()));
+            intent.putExtra("contact_name", String.valueOf(contact.getFullName()));
+            intent.putExtra("user", (Serializable) userList.get(position));
+            startActivity(intent);
 
-                intent.putExtra("user", (Serializable) userList.get(position));
-                startActivity(intent);
-            } else {
-                Intent intent = new Intent(ContactDetailsActivity.this, EditRemarkActivity.class);
-                intent.putExtra("has_data", "null");
-                intent.putExtra("row_index", String.valueOf(position));
-                intent.putExtra("event",  String.valueOf(event));
-
-                intent.putExtra("contact_id",  String.valueOf(contact.getId()));
-                startActivity(intent);
-            }
         } else {
             Intent intent = new Intent(ContactDetailsActivity.this, EditRemarkActivity.class);
             intent.putExtra("has_data", "null");
-            intent.putExtra("event",  String.valueOf(event));
+            intent.putExtra("event", String.valueOf(event));
             intent.putExtra("row_index", String.valueOf(position));
-            intent.putExtra("contact_id",  String.valueOf(contact.getId()));
+            intent.putExtra("contact_id", String.valueOf(contact.getId()));
+            intent.putExtra("contact_name", String.valueOf(contact.getFullName()));
             startActivity(intent);
         }
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.details_manu, menu);
         return true;
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
         if (item.getItemId() == R.id.delete_menu) {
             deleteData();
             return true;
-        }
-        else if (item.getItemId() == android.R.id.home) {
+        } else if (item.getItemId() == android.R.id.home) {
             finish(); // close this activity and return to preview activity (if there is any)
         }
         return super.onOptionsItemSelected(item);
@@ -452,6 +468,7 @@ public class ContactDetailsActivity extends AppCompatActivity implements View.On
         load(event);
         remarkRV.scrollToPosition(pos);
     }
+
 
     //    @Override
 //    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {

@@ -13,13 +13,15 @@ import android.os.Build;
 
 import androidx.core.app.NotificationCompat;
 
+import java.util.Calendar;
+
 public class NotificationReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         String CHANNEL_1_ID = "channel1";
         String TAG = "NotificationReceiver";
         String description = intent.getStringExtra("description");
-        String status = intent.getStringExtra("status");
+        String contact_name = intent.getStringExtra("contact_name");
         if ("android.intent.action.BOOT_COMPLETED".equals(intent.getAction())) {
             NotificationManager mNotificationManager =
                     (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -30,8 +32,8 @@ public class NotificationReceiver extends BroadcastReceiver {
             NotificationCompat.Builder mBuilder =
                     new NotificationCompat.Builder(context.getApplicationContext(), CHANNEL_1_ID)
                             .setSmallIcon(R.drawable.ic_logo)
-                            .setContentTitle(description)
-                            .setContentText(status)
+                            .setContentTitle(contact_name)
+                            .setContentText("Follow Up : "+description)
                             .setColor(context.getResources().getColor(R.color.black))
                             .setSound(alarmSound)
                             .setAutoCancel(true)
@@ -51,7 +53,7 @@ public class NotificationReceiver extends BroadcastReceiver {
                 mBuilder.setChannelId(CHANNEL_1_ID);
             }
 
-            mNotificationManager.notify(0, mBuilder.build());
+            mNotificationManager.notify((int) Calendar.getInstance().getTimeInMillis(), mBuilder.build());
 
         }
         NotificationManager mNotificationManager =
@@ -63,8 +65,8 @@ public class NotificationReceiver extends BroadcastReceiver {
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(context.getApplicationContext(), CHANNEL_1_ID)
                         .setSmallIcon(R.drawable.ic_logo)
-                        .setContentTitle(description)
-                        .setContentText(status)
+                        .setContentTitle(contact_name)
+                        .setContentText("Follow Up : "+description)
                         .setColor(context.getResources().getColor(R.color.black))
                         .setSound(alarmSound)
                         .setAutoCancel(true)
@@ -83,6 +85,6 @@ public class NotificationReceiver extends BroadcastReceiver {
             mBuilder.setChannelId(CHANNEL_1_ID);
         }
 
-        mNotificationManager.notify(0, mBuilder.build());
+        mNotificationManager.notify((int) Calendar.getInstance().getTimeInMillis(), mBuilder.build());
     }
 }

@@ -45,7 +45,8 @@ public class AddActivity extends AppCompatActivity implements DatePickerDialog.O
     private String userChoosenTask;
     private int REQUEST_CAMERA = 0, SELECT_FILE = 1;
     int day, month, year;
-    String daystr = "", monthstr = "", yearstr = "";
+    String dob = "";
+    String[] monthName = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -240,14 +241,11 @@ public class AddActivity extends AppCompatActivity implements DatePickerDialog.O
             phone.requestFocus();
             return 0;
         }else {
-
-        String date = "" + daystr + monthstr + yearstr;
-        Log.d("TAG", "save: " + date);
         ContentValues values = new ContentValues();
         values.put(DbHelper.COLUMN_2, fullName.getText().toString());
         values.put(DbHelper.COLUMN_3, phone.getText().toString());
         values.put(DbHelper.COLUMN_4, genderSpinnerText.getSelectedItem().toString());
-        values.put(DbHelper.COLUMN_5, date);
+        values.put(DbHelper.COLUMN_5, dob);
         values.put(DbHelper.COLUMN_6, address1.getText().toString());
         values.put(DbHelper.COLUMN_7, address2.getText().toString());
         values.put(DbHelper.COLUMN_8, city.getText().toString());
@@ -270,21 +268,26 @@ public class AddActivity extends AppCompatActivity implements DatePickerDialog.O
 
     @SuppressLint("SetTextI18n")
     @Override
-    public void onDateSet(DatePicker view, int year, int monthhere, int dayOfMonth) {
-        month = monthhere + 1;
-        if (dayOfMonth < 10) {
-            daystr = "0" + dayOfMonth;
-        } else {
-            daystr = "" + dayOfMonth;
-        }
-        if (month < 10) {
-            monthstr = "0" + month;
-        } else {
-            monthstr = "" + month;
-        }
-        yearstr = "" + year;
+    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+//        month = monthhere + 1;
+//        if (dayOfMonth < 10) {
+//            daystr = "0" + dayOfMonth;
+//        } else {
+//            daystr = "" + dayOfMonth;
+//        }
+//        if (month < 10) {
+//            monthstr = "0" + month;
+//        } else {
+//            monthstr = "" + month;
+//        }
+//        yearstr = "" + year;
+//
+//        yearstr = ""+year;
 
-        dobtv.setText(daystr + " / " + monthstr + " / " + yearstr);
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(year,month,dayOfMonth);
+        dob = String.valueOf(calendar.getTimeInMillis());
+        dobtv.setText(dayOfMonth+" "+monthName[month]+" "+(year%100));
 
     }
 }

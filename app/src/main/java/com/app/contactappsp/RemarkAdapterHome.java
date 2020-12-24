@@ -45,8 +45,14 @@ public class RemarkAdapterHome extends RecyclerView.Adapter<RemarkAdapterHome.Re
                 holder.remark2Tv.setText(contactVO.getRemark2());
 
                 String dateTemp = contactVO.getDate();
-                int monthTemp = Integer.parseInt(""+dateTemp.charAt(3)+dateTemp.charAt(4));
-                holder.dateTv.setText("Date Commencing: " + dateTemp.charAt(0)+dateTemp.charAt(1) +" "+monthName[monthTemp]+" "+dateTemp.charAt(8)+dateTemp.charAt(9));
+                if (!dateTemp.trim().equals("")) {
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.setTimeInMillis(Long.parseLong(dateTemp));
+                    holder.dateTv.setText("Date Commencing: " + calendar.get(Calendar.DAY_OF_MONTH) + " " + monthName[calendar.get(Calendar.MONTH)] + " " + (calendar.get(Calendar.YEAR) % 100));
+
+                    //                    int monthTemp = Integer.parseInt("" + dateTemp.charAt(3) + dateTemp.charAt(4));
+//                    holder.dateTv.setText("Date Commencing: " + dateTemp.charAt(0) + dateTemp.charAt(1) + " " + monthName[monthTemp] + " " + dateTemp.charAt(8) + dateTemp.charAt(9));
+                }
 //                holder.dateTv.setText("Date Commencing: " + contactVO.getDate());
                 holder.statusTv.setText("Status: " + contactVO.getStatus());
 

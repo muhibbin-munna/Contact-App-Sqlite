@@ -27,7 +27,7 @@ import java.util.Calendar;
 public class EditRemarkActivity extends AppCompatActivity implements DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener {
     private EditText edit_des, edit_status, edit_remark1, edit_remark2;
     TextView edit_date;
-    String row_index, has_data, notify = "0", event, contact_id;
+    String row_index, has_data, notify = "0", event, contact_id,contact_name;
     MyRemarkDetails user;
     int day, month, year, hour, minute;
     int myday, myMonth, myYear, myHour, myMinute;
@@ -40,7 +40,6 @@ public class EditRemarkActivity extends AppCompatActivity implements DatePickerD
     ImageButton dateCommencingButton;
     String[] monthName = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
     String commenceDate = "";
-    String monthStr="", yearStr="", dayStr="";
 
     @SuppressLint("SetTextI18n")
     @Override
@@ -66,15 +65,19 @@ public class EditRemarkActivity extends AppCompatActivity implements DatePickerD
         row_index = intent.getStringExtra("row_index");
         event = intent.getStringExtra("event");
         contact_id = intent.getStringExtra("contact_id");
+        contact_name = intent.getStringExtra("contact_name");
 
         user = (MyRemarkDetails) intent.getSerializableExtra("user");
         if (!has_data.equals("null")) {
             edit_des.setText(user.getDescription());
-            String dateTemp = user.getDate();
-            if(!dateTemp.trim().equals("")) {
-                commenceDate = dateTemp;
-                int monthTemp = Integer.parseInt("" + dateTemp.charAt(3) + dateTemp.charAt(4));
-                edit_date.setText("" + dateTemp.charAt(0) + dateTemp.charAt(1) + " " + monthName[monthTemp] + " " + dateTemp.charAt(8) + dateTemp.charAt(9));
+              String dateTemp = user.getDate();
+                if(!dateTemp.trim().equals("")) {
+                    commenceDate = dateTemp;
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTimeInMillis(Long.parseLong(dateTemp));
+                edit_date.setText(calendar.get(Calendar.DAY_OF_MONTH)+" "+monthName[calendar.get(Calendar.MONTH)] +" "+ (calendar.get(Calendar.YEAR)%100));
+
+//                edit_date.setText("" +dateTemp);
             }
             edit_status.setText(user.getStatus());
             edit_remark1.setText(user.getRemark1());
@@ -142,12 +145,33 @@ public class EditRemarkActivity extends AppCompatActivity implements DatePickerD
             @Override
             public void onClick(View v) {
                 commencing = true;
-                Calendar calendar = Calendar.getInstance();
-                year = calendar.get(Calendar.YEAR);
-                month = calendar.get(Calendar.MONTH);
-                day = calendar.get(Calendar.DAY_OF_MONTH);
-                DatePickerDialog datePickerDialog = new DatePickerDialog(EditRemarkActivity.this, EditRemarkActivity.this, year, month, day);
-                datePickerDialog.show();
+                if (!has_data.equals("null")) {
+                    String dateTemp = user.getDate();
+                    if (!dateTemp.trim().equals("")) {
+                        Calendar calendar = Calendar.getInstance();
+                        calendar.setTimeInMillis(Long.parseLong(dateTemp));
+                        year = calendar.get(Calendar.YEAR);
+                        month = calendar.get(Calendar.MONTH);
+                        day = calendar.get(Calendar.DAY_OF_MONTH);
+                        DatePickerDialog datePickerDialog = new DatePickerDialog(EditRemarkActivity.this, EditRemarkActivity.this, year, month, day);
+                        datePickerDialog.show();
+                    } else {
+                        Calendar calendar = Calendar.getInstance();
+                        year = calendar.get(Calendar.YEAR);
+                        month = calendar.get(Calendar.MONTH);
+                        day = calendar.get(Calendar.DAY_OF_MONTH);
+                        DatePickerDialog datePickerDialog = new DatePickerDialog(EditRemarkActivity.this, EditRemarkActivity.this, year, month, day);
+                        datePickerDialog.show();
+                    }
+                }
+                else {
+                    Calendar calendar = Calendar.getInstance();
+                    year = calendar.get(Calendar.YEAR);
+                    month = calendar.get(Calendar.MONTH);
+                    day = calendar.get(Calendar.DAY_OF_MONTH);
+                    DatePickerDialog datePickerDialog = new DatePickerDialog(EditRemarkActivity.this, EditRemarkActivity.this, year, month, day);
+                    datePickerDialog.show();
+                }
             }
         });
 
@@ -158,19 +182,11 @@ public class EditRemarkActivity extends AppCompatActivity implements DatePickerD
     public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
         if (commencing) {
             edit_date.setText(dayOfMonth + " " + monthName[month] + " " + (year % 100));
-            if(dayOfMonth<10) {
-                dayStr = "0" + dayOfMonth;
-            }
-            else {
-                dayStr = "" + dayOfMonth;
-            }
-            if(month<10) {
-                monthStr = "0" + month;
-            }
-            else {
-                monthStr = "" + month;
-            }
-            commenceDate = dayStr + "/" + monthStr + "/" + year;
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(Calendar.DAY_OF_MONTH,dayOfMonth);
+            calendar.set(Calendar.MONTH,month);
+            calendar.set(Calendar.YEAR,year);
+            commenceDate = String.valueOf(calendar.getTimeInMillis());
             Log.d(TAG, "onDateSet:1 "+commenceDate);
         } else {
             myYear = year;
@@ -215,7 +231,7 @@ public class EditRemarkActivity extends AppCompatActivity implements DatePickerD
         Log.d(TAG, "onTimeSet: " + myYear + " " + myMonth + " " + myday + " " + myHour + " " + myMinute);
     }
 
-    private void setAlarm(int year, int monthAlarm, int dateAlarm, int hourAlarm, int minuteAlarm, String description, String status) {
+    private void setAlarm(int year, int monthAlarm, int dateAlarm, int hourAlarm, int minuteAlarm, String description) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
         calendar.set(Calendar.DATE, dateAlarm);
@@ -231,8 +247,9 @@ public class EditRemarkActivity extends AppCompatActivity implements DatePickerD
             Intent intent = new Intent(EditRemarkActivity.this, NotificationReceiver.class);
             boolean isWorking = (PendingIntent.getBroadcast(EditRemarkActivity.this, Integer.parseInt(req_code), intent, PendingIntent.FLAG_NO_CREATE) != null);//just changed the flag
             if (!isWorking) {
+                intent.putExtra("contact_name", contact_name);
                 intent.putExtra("description", description);
-                intent.putExtra("status", status);
+
                 PendingIntent pendingIntent = PendingIntent.getBroadcast(EditRemarkActivity.this, Integer.parseInt(req_code), intent, PendingIntent.FLAG_UPDATE_CURRENT);
                 AlarmManager alarmMgr = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
                 alarmMgr.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
@@ -247,7 +264,7 @@ public class EditRemarkActivity extends AppCompatActivity implements DatePickerD
     }
 
     public void save(View view) {
-        setAlarm(myYear, myMonth, myday, myHour, myMinute, edit_des.getText().toString(), edit_status.getText().toString());
+        setAlarm(myYear, myMonth, myday, myHour, myMinute, edit_des.getText().toString());
         String description = edit_des.getText().toString();
         String date = commenceDate;
         String status = edit_status.getText().toString();

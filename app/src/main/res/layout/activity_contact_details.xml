@@ -5,9 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ContactDetailsActivity">
-
-
-
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -48,7 +45,46 @@
                     app:srcCompat="@drawable/pp" />
 
             </androidx.cardview.widget.CardView>
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                app:cardCornerRadius="10dp">
 
+                <LinearLayout
+                    android:padding="5dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center">
+
+                    <ImageButton
+                        android:id="@+id/buttonCall"
+                        android:layout_width="80dp"
+                        android:layout_height="30dp"
+                        android:background="@null"
+                        android:onClick="call"
+                        android:src="@drawable/ic_phone_call"
+                        />
+
+                    <ImageButton
+                        android:id="@+id/buttonMessage"
+                        android:layout_width="80dp"
+                        android:layout_height="30dp"
+                        android:background="@null"
+                        android:onClick="message"
+                        android:src="@drawable/ic_comment" />
+                    <ImageButton
+                        android:id="@+id/buttonWA"
+                        android:layout_width="80dp"
+                        android:layout_height="30dp"
+                        android:background="@null"
+                        android:onClick="whatsapp"
+                        android:src="@drawable/ic_whatsapp" />
+
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

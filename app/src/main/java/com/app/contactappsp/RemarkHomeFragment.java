@@ -16,6 +16,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class RemarkHomeFragment extends Fragment implements RemarkAdapterHome.OnItemClickListener {
@@ -65,21 +67,34 @@ public class RemarkHomeFragment extends Fragment implements RemarkAdapterHome.On
 
                 Calendar calendar = Calendar.getInstance();
                 calendar.setTimeInMillis(Long.parseLong(contactDetails.getNotify()));
-                if(calendar.get(Calendar.YEAR) == todayYear) {
+                if (calendar.get(Calendar.YEAR) == todayYear) {
                     if (calendar.get(Calendar.DAY_OF_MONTH) == todayDay && calendar.get(Calendar.MONTH) == todayMonth) {
                         userList.add(contactDetails);
                     }
                 }
 
             }
-            Log.d("TAG", "load: "+userList.size());
+            Log.d("TAG", "load: " + userList.size());
             cursor.close();
+            Collections.sort(
+                    userList,
+                    new Comparator<MyRemarkDetails>() {
+                        public int compare(MyRemarkDetails lhs, MyRemarkDetails rhs) {
+                            return lhs.getNotify().compareTo(rhs.getNotify());
+                        }
+                    }
+            );
             remarkAdapterHome = new RemarkAdapterHome(userList, getContext());
             remarkRV.setLayoutManager(new LinearLayoutManager(getContext()));
             remarkRV.setAdapter(remarkAdapterHome);
             remarkAdapterHome.setOnRemarkClickListener(this);
-        }
-        else {
+            if (userList.size() == 0) {
+                {
+                    noNotificationDisplay.setText("No Notification");
+                    noNotificationDisplay.setVisibility(View.VISIBLE);
+                }
+            }
+        } else {
             noNotificationDisplay.setText("No Notification");
             noNotificationDisplay.setVisibility(View.VISIBLE);
         }
@@ -91,9 +106,9 @@ public class RemarkHomeFragment extends Fragment implements RemarkAdapterHome.On
         int data = Integer.parseInt(userList.get(position).getContactId());
         int event = Integer.parseInt(userList.get(position).getEvent());
         int row = Integer.parseInt(userList.get(position).getRow());
-        intent.putExtra("contact",data);
-        intent.putExtra("event",event);
-        intent.putExtra("row",row);
+        intent.putExtra("contact", data);
+        intent.putExtra("event", event);
+        intent.putExtra("row", 1);
         startActivity(intent);
 
     }

@@ -37,7 +37,8 @@ public class RemarkAdapter extends RecyclerView.Adapter<RemarkAdapter.RemarkView
     @Override
     public void onBindViewHolder(RemarkViewHolder holder, int position) {
         Log.d("TAG", "onBindViewHolder: "+contactVOList.size());
-            if(contactVOList.get(position)!=null) {
+        if(position<contactVOList.size()) {
+            if (contactVOList.get(position) != null) {
 //            if (contactVOList.get(position).getId().equals(String.valueOf(position))) {
                 MyRemarkDetails contactVO = contactVOList.get(position);
                 holder.descriptionTv.setText(contactVO.getDescription());
@@ -45,9 +46,13 @@ public class RemarkAdapter extends RecyclerView.Adapter<RemarkAdapter.RemarkView
                 holder.remark2Tv.setText(contactVO.getRemark2());
 
                 String dateTemp = contactVO.getDate();
-                if(!dateTemp.trim().equals("")) {
-                    int monthTemp = Integer.parseInt("" + dateTemp.charAt(3) + dateTemp.charAt(4));
-                    holder.dateTv.setText("Date Commencing: " + dateTemp.charAt(0) + dateTemp.charAt(1) + " " + monthName[monthTemp] + " " + dateTemp.charAt(8) + dateTemp.charAt(9));
+                if (!dateTemp.trim().equals("")) {
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.setTimeInMillis(Long.parseLong(dateTemp));
+                    holder.dateTv.setText("Date Commencing: " + calendar.get(Calendar.DAY_OF_MONTH) + " " + monthName[calendar.get(Calendar.MONTH)] + " " + (calendar.get(Calendar.YEAR) % 100));
+
+                    //                    int monthTemp = Integer.parseInt("" + dateTemp.charAt(3) + dateTemp.charAt(4));
+//                    holder.dateTv.setText("Date Commencing: " + dateTemp.charAt(0) + dateTemp.charAt(1) + " " + monthName[monthTemp] + " " + dateTemp.charAt(8) + dateTemp.charAt(9));
                 }
 //                holder.dateTv.setText("Date Commencing: " + contactVO.getDate());
                 holder.statusTv.setText("Status: " + contactVO.getStatus());
@@ -59,27 +64,25 @@ public class RemarkAdapter extends RecyclerView.Adapter<RemarkAdapter.RemarkView
 
                     Calendar calendar = Calendar.getInstance();
                     calendar.setTimeInMillis(Long.parseLong(contactVO.getNotify()));
-                    if(calendar.get(Calendar.AM_PM) == Calendar.AM){
-                        ap= "AM";
-                    }
-                    else {
-                        ap="PM";
+                    if (calendar.get(Calendar.AM_PM) == Calendar.AM) {
+                        ap = "AM";
+                    } else {
+                        ap = "PM";
                     }
 
 //                    holder.alarmDateTv.setText("Date: "+dateTemp.charAt(0)+dateTemp.charAt(1) +" "+monthName[monthTemp]+" "+dateTemp.charAt(8)+dateTemp.charAt(9));
-                    holder.alarmDateTv.setText("Date: " + calendar.get(Calendar.DAY_OF_MONTH) + " " + monthName[calendar.get(Calendar.MONTH)] + " " + (calendar.get(Calendar.YEAR)%100));
-                    if(calendar.get(Calendar.MINUTE)<10){
+                    holder.alarmDateTv.setText("Date: " + calendar.get(Calendar.DAY_OF_MONTH) + " " + monthName[calendar.get(Calendar.MONTH)] + " " + (calendar.get(Calendar.YEAR) % 100));
+                    if (calendar.get(Calendar.MINUTE) < 10) {
                         holder.alarmTimeTv.setText("Time: " + calendar.get(Calendar.HOUR) + ":0" + calendar.get(Calendar.MINUTE) + " " + ap);
-                    }
-                    else {
+                    } else {
                         holder.alarmTimeTv.setText("Time: " + calendar.get(Calendar.HOUR) + ":" + calendar.get(Calendar.MINUTE) + " " + ap);
                     }
-                }
-                else {
+                } else {
                     holder.notifyCB.setSelected(false);
                     holder.enableCB.setChecked(false);
                 }
             }
+        }
 //            }
     }
 

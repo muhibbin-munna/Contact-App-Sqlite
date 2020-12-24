@@ -6,6 +6,7 @@ import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -13,14 +14,12 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Base64;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
@@ -29,7 +28,6 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.MimeTypeMap;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,18 +36,22 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.fragment.app.Fragment;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, TextView.OnEditorActionListener, PopupMenu.OnMenuItemClickListener {
     EditTextV2 name, remark1, remark2;
@@ -58,11 +60,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @SuppressLint("StaticFieldLeak")
     static TextView no_of_contact;
     SharedPreferences sharedpreferences;
-    ImageView ppImageView;
+    CircleImageView ppImageView;
     FloatingActionButton addContactFabButton;
     private String userChoosenTask;
     ArrayList<Contact> contacts = new ArrayList<>();
-    private int REQUEST_CAMERA = 0, SELECT_FILE = 1;
+    private int REQUEST_CAMERA = 0, SELECT_FILE = 1, IMPORT_CONTACTS = 2, IMPORT_REMARK = 3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,12 +114,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
         }
-        String previouslyEncodedImage = sharedpreferences.getString("pp_data", "");
-        if (!previouslyEncodedImage.equalsIgnoreCase("")) {
-            byte[] b = Base64.decode(previouslyEncodedImage, Base64.DEFAULT);
-            Bitmap bitmap = BitmapFactory.decodeByteArray(b, 0, b.length);
-            ppImageView.setImageBitmap(bitmap);
-        }
+//        String previouslyEncodedImage = sharedpreferences.getString("pp_data", "");
+//        if (!previouslyEncodedImage.equalsIgnoreCase("")) {
+//            byte[] b = Base64.decode(previouslyEncodedImage, Base64.DEFAULT);
+//            Bitmap bitmap = BitmapFactory.decodeByteArray(b, 0, b.length);
+//            ppImageView.setImageBitmap(bitmap);
+//        }
+        loadImageFromStorage(getApplicationContext().getFilesDir().getParentFile().getPath() + "/app_imageDir");
+
         name.setText(namePref);
         remark1.setText(remark1Pref);
         remark2.setText(remark2Pref);
@@ -205,7 +209,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 contact.setPostCode(cursor.getString(8));
                 contact.setRemark(cursor.getString(9));
                 contact.setImage(cursor.getString(10));
-
                 contacts.add(contact);
 
             } while (cursor.moveToNext());
@@ -243,9 +246,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void galleryIntent() {
+
         Intent intent = new Intent();
         intent.setType("image/*");
-        intent.setAction(Intent.ACTION_GET_CONTENT);//
+        intent.setAction(Intent.ACTION_GET_CONTENT);
         startActivityForResult(Intent.createChooser(intent, "Select File"), SELECT_FILE);
     }
 
@@ -266,25 +270,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (item.getItemId()) {
             case R.id.export_contact:
                 boolean result = Utility.checkPermission(MainActivity.this);
-                if(result){
+                if (result) {
                     exportDB();
                 }
                 return true;
             case R.id.import_contact:
                 result = Utility.checkPermission(MainActivity.this);
-                if(result){
+                if (result) {
                     importDb();
                 }
                 return true;
             case R.id.export_event:
                 result = Utility.checkPermission(MainActivity.this);
-                if(result){
+                if (result) {
                     exportRemark();
                 }
                 return true;
             case R.id.import_event:
                 result = Utility.checkPermission(MainActivity.this);
-                if(result){
+                if (result) {
                     importRemark();
                 }
                 return true;
@@ -313,7 +317,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
                 });
                 builder.show();
-
                 return true;
             case R.id.item4:
                 Toast.makeText(this, "Item 4 clicked", Toast.LENGTH_SHORT).show();
@@ -332,7 +335,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         String[] mimetypes = {"text/csv", "text/comma-separated-values", "application/csv"};
         intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes);
         try {
-            startActivityForResult(Intent.createChooser(intent, "Select File"),11);
+            startActivityForResult(Intent.createChooser(intent, "Select File"), IMPORT_REMARK);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -343,40 +346,40 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         ProgressDialog dialog = new ProgressDialog(MainActivity.this);
 
         dialog.show();
-//        DbHelper dbhelper = new DbHelper(this,DbHelper.DB_NAME,null,DbHelper.DB_VERSION);
         MyDatabaseHelper dbhelper = new MyDatabaseHelper(this);
         File exportDir = new File(Environment.getExternalStorageDirectory(), "/FinCard/");
-        if (!exportDir.exists()) { exportDir.mkdirs(); }
-//        Calendar calendarTemp = Calendar.getInstance();
-//        String fileName = "" + calendarTemp.get(Calendar.YEAR) + calendarTemp.get(Calendar.MONTH) + calendarTemp.get(Calendar.DAY_OF_MONTH) + "_" + calendarTemp.get(Calendar.HOUR_OF_DAY) + calendarTemp.get(Calendar.MINUTE) + calendarTemp.get(Calendar.SECOND);
+        if (!exportDir.exists()) {
+            exportDir.mkdirs();
+        }
         String backupDBPath = "event.csv";
         File file = new File(exportDir, backupDBPath);
         try {
-            if(file.exists()){
+            if (file.exists()) {
                 file.delete();
             }
             file.createNewFile();
             CSVWriter csvWrite = new CSVWriter(new FileWriter(file));
             Cursor curCSV = dbhelper.raw();
             csvWrite.writeNext(curCSV.getColumnNames());
-            while(curCSV.moveToNext()) {
-                String arrStr[]=null;
+            while (curCSV.moveToNext()) {
+                String arrStr[] = null;
                 String[] mySecondStringArray = new String[curCSV.getColumnNames().length];
-                for(int i=0;i<curCSV.getColumnNames().length;i++)
-                {
-                    mySecondStringArray[i] =curCSV.getString(i);
+                for (int i = 0; i < curCSV.getColumnNames().length; i++) {
+                    mySecondStringArray[i] = curCSV.getString(i);
                 }
                 csvWrite.writeNext(mySecondStringArray);
             }
             csvWrite.close();
             curCSV.close();
-            success= true;
+            success = true;
         } catch (IOException e) {
-            success= false;
+            success = false;
         }
-        if (dialog.isShowing()) { dialog.dismiss(); }
+        if (dialog.isShowing()) {
+            dialog.dismiss();
+        }
         if (success) {
-            Toast.makeText(MainActivity.this, "Export successful! to dir/FinCard/"+backupDBPath, Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this, "Export successful! to dir/FinCard/" + backupDBPath, Toast.LENGTH_SHORT).show();
 
         } else {
             Toast.makeText(MainActivity.this, "Export failed", Toast.LENGTH_SHORT).show();
@@ -389,13 +392,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         String[] mimetypes = {"text/csv", "text/comma-separated-values", "application/csv"};
         intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes);
         try {
-         startActivityForResult(Intent.createChooser(intent, "Select File"),10);
+            startActivityForResult(Intent.createChooser(intent, "Select File"), IMPORT_CONTACTS);
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
-
 
     private String getFileExtension(Uri uri) {
         ContentResolver cR = getContentResolver();
@@ -408,39 +409,40 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         ProgressDialog dialog = new ProgressDialog(MainActivity.this);
 
         dialog.show();
-        DbHelper dbhelper = new DbHelper(this,DbHelper.DB_NAME,null,DbHelper.DB_VERSION);
+        DbHelper dbhelper = new DbHelper(this, DbHelper.DB_NAME, null, DbHelper.DB_VERSION);
         File exportDir = new File(Environment.getExternalStorageDirectory(), "/FinCard/");
-        if (!exportDir.exists()) { exportDir.mkdirs(); }
-//        Calendar calendarTemp = Calendar.getInstance();
-//        String fileName = "" + calendarTemp.get(Calendar.YEAR) + calendarTemp.get(Calendar.MONTH) + calendarTemp.get(Calendar.DAY_OF_MONTH) + "_" + calendarTemp.get(Calendar.HOUR_OF_DAY) + calendarTemp.get(Calendar.MINUTE) + calendarTemp.get(Calendar.SECOND);
+        if (!exportDir.exists()) {
+            exportDir.mkdirs();
+        }
         String backupDBPath = "contacts.csv";
         File file = new File(exportDir, backupDBPath);
         try {
-            if(file.exists()){
+            if (file.exists()) {
                 file.delete();
             }
             file.createNewFile();
             CSVWriter csvWrite = new CSVWriter(new FileWriter(file));
             Cursor curCSV = dbhelper.raw();
             csvWrite.writeNext(curCSV.getColumnNames());
-            while(curCSV.moveToNext()) {
-                String arrStr[]=null;
+            while (curCSV.moveToNext()) {
+                String arrStr[] = null;
                 String[] mySecondStringArray = new String[curCSV.getColumnNames().length];
-                for(int i=0;i<curCSV.getColumnNames().length;i++)
-                {
-                    mySecondStringArray[i] =curCSV.getString(i);
+                for (int i = 0; i < curCSV.getColumnNames().length; i++) {
+                    mySecondStringArray[i] = curCSV.getString(i);
                 }
                 csvWrite.writeNext(mySecondStringArray);
             }
             csvWrite.close();
             curCSV.close();
-            success= true;
+            success = true;
         } catch (IOException e) {
-            success= false;
+            success = false;
         }
-        if (dialog.isShowing()) { dialog.dismiss(); }
+        if (dialog.isShowing()) {
+            dialog.dismiss();
+        }
         if (success) {
-            Toast.makeText(MainActivity.this, "Export successful! to dir/FinCard"+backupDBPath, Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this, "Export successful! to dir/FinCard" + backupDBPath, Toast.LENGTH_SHORT).show();
 
         } else {
             Toast.makeText(MainActivity.this, "Export failed", Toast.LENGTH_SHORT).show();
@@ -475,9 +477,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.addContactFabButton:
-                startActivity(new Intent(MainActivity.this, AddActivity.class));
+        if (v.getId() == R.id.addContactFabButton) {
+            startActivity(new Intent(MainActivity.this, AddActivity.class));
         }
     }
 
@@ -485,197 +486,198 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onActivityResult(int reqCode, int resultCode, Intent data) {
         super.onActivityResult(reqCode, resultCode, data);
-        if (reqCode == 10 && resultCode == RESULT_OK
-                && data != null && data.getData() != null) {
-            String filePath = data.getData().getPath();
-            if(filePath.contains("/root_path"))
-            {
-                filePath = filePath.replace("/root_path","");
-            }
-            else if(filePath.contains("/document/primary:"))
-            {
-                filePath = filePath.replace("/document/primary:","");
-                filePath = Environment.getExternalStorageDirectory()+"/"+filePath;
-            }
-            Log.d(TAG, "onActivityResult: "+filePath);
-            File csvFile = new File(filePath);
-            if (csvFile.exists()){
-                try {
-                    DbHelper helper = new DbHelper(this,DbHelper.DB_NAME,null,DbHelper.DB_VERSION);
-                    SQLiteDatabase db = helper.getWritableDatabase();
-                    CSVReader csvReader = new CSVReader(new FileReader(csvFile.getAbsolutePath()));
-                    String[] nextLine;
-                    while ((nextLine=csvReader.readNext()) != null){
-                        ContentValues values = new ContentValues();
-                        values.put(DbHelper.COLUMN_1,nextLine[0]);
-                        values.put(DbHelper.COLUMN_2,nextLine[1]);
-                        values.put(DbHelper.COLUMN_3,nextLine[2]);
-                        values.put(DbHelper.COLUMN_4,nextLine[3]);
-                        values.put(DbHelper.COLUMN_5,nextLine[4]);
-                        values.put(DbHelper.COLUMN_6,nextLine[5]);
-                        values.put(DbHelper.COLUMN_7,nextLine[6]);
-                        values.put(DbHelper.COLUMN_8,nextLine[7]);
-                        values.put(DbHelper.COLUMN_9,nextLine[8]);
-                        values.put(DbHelper.COLUMN_10,nextLine[9]);
-                        values.put(DbHelper.COLUMN_11,nextLine[10]);
-                        long insertId = db.insert(DbHelper.TABLE_NAME,null,values);
+        if (resultCode == RESULT_OK) {
+            if (reqCode == REQUEST_CAMERA) {
+                Log.d(TAG, "onActivityResult: REQUEST_CAMERA");
+                onCaptureImageResult(data);
+            } else if (reqCode == SELECT_FILE) {
+                onSelectFromGalleryResult(data);
+            } else if (reqCode == IMPORT_CONTACTS) {
+                if (data != null && data.getData() != null) {
+                    String filePath = data.getData().getPath();
+                    if (filePath.contains("/root_path")) {
+                        filePath = filePath.replace("/root_path", "");
+                    } else if (filePath.contains("/document/primary:")) {
+                        filePath = filePath.replace("/document/primary:", "");
+                        filePath = Environment.getExternalStorageDirectory() + "/" + filePath;
                     }
-                    Toast.makeText(this,"Imported Successfully..",Toast.LENGTH_SHORT).show();
-                    db.close();
-                } catch (IOException e) {
-                    Toast.makeText(this,"Failed "+e.getMessage(),Toast.LENGTH_SHORT).show();
-                    e.printStackTrace();
+                    Log.d(TAG, "onActivityResult: " + filePath);
+                    File csvFile = new File(filePath);
+                    if (csvFile.exists()) {
+                        try {
+                            DbHelper helper = new DbHelper(this, DbHelper.DB_NAME, null, DbHelper.DB_VERSION);
+                            SQLiteDatabase db = helper.getWritableDatabase();
+                            CSVReader csvReader = new CSVReader(new FileReader(csvFile.getAbsolutePath()));
+                            String[] nextLine;
+                            while ((nextLine = csvReader.readNext()) != null) {
+                                ContentValues values = new ContentValues();
+                                values.put(DbHelper.COLUMN_1, nextLine[0]);
+                                values.put(DbHelper.COLUMN_2, nextLine[1]);
+                                values.put(DbHelper.COLUMN_3, nextLine[2]);
+                                values.put(DbHelper.COLUMN_4, nextLine[3]);
+                                values.put(DbHelper.COLUMN_5, nextLine[4]);
+                                values.put(DbHelper.COLUMN_6, nextLine[5]);
+                                values.put(DbHelper.COLUMN_7, nextLine[6]);
+                                values.put(DbHelper.COLUMN_8, nextLine[7]);
+                                values.put(DbHelper.COLUMN_9, nextLine[8]);
+                                values.put(DbHelper.COLUMN_10, nextLine[9]);
+                                values.put(DbHelper.COLUMN_11, nextLine[10]);
+                                long insertId = db.insert(DbHelper.TABLE_NAME, null, values);
+                            }
+                            Toast.makeText(this, "Imported Successfully..", Toast.LENGTH_SHORT).show();
+                            db.close();
+                        } catch (IOException e) {
+                            Toast.makeText(this, "Failed " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            e.printStackTrace();
 
-                } catch (CsvValidationException e) {
-                    e.printStackTrace();
+                        } catch (CsvValidationException e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        Toast.makeText(this, "Failed to get data", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            } else if (reqCode == IMPORT_REMARK) {
+                if (data != null && data.getData() != null) {
+                    String filePath = data.getData().getPath();
+                    if (filePath.contains("/root_path")) {
+                        filePath = filePath.replace("/root_path", "");
+                    } else if (filePath.contains("/document/primary:")) {
+                        filePath = filePath.replace("/document/primary:", "");
+                        filePath = Environment.getExternalStorageDirectory() + "/" + filePath;
+                    }
+                    Log.d(TAG, "onActivityResult: " + filePath);
+                    File csvFile = new File(filePath);
+                    if (csvFile.exists()) {
+                        try {
+                            MyDatabaseHelper helper = new MyDatabaseHelper(this);
+                            SQLiteDatabase db = helper.getWritableDatabase();
+                            CSVReader csvReader = new CSVReader(new FileReader(csvFile.getAbsolutePath()));
+                            String[] nextLine;
+                            while ((nextLine = csvReader.readNext()) != null) {
+                                ContentValues values = new ContentValues();
+                                values.put(MyDatabaseHelper.KEY_ID, nextLine[0]);
+                                values.put(MyDatabaseHelper.CONTACT_ID, nextLine[1]);
+                                values.put(MyDatabaseHelper.EVENT, nextLine[2]);
+                                values.put(MyDatabaseHelper.ROW, nextLine[3]);
+                                values.put(MyDatabaseHelper.DES, nextLine[4]);
+                                values.put(MyDatabaseHelper.REM_1, nextLine[5]);
+                                values.put(MyDatabaseHelper.REM_2, nextLine[6]);
+                                values.put(MyDatabaseHelper.NOTIFY, nextLine[7]);
+                                values.put(MyDatabaseHelper.DATE, nextLine[8]);
+                                values.put(MyDatabaseHelper.STATUS, nextLine[9]);
+                                long insertId = db.insert(MyDatabaseHelper.TABLE1_NAME, null, values);
+                            }
+                            Toast.makeText(this, "Imported Successfully..", Toast.LENGTH_SHORT).show();
+                            db.close();
+                        } catch (IOException e) {
+                            Toast.makeText(this, "Failed " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            e.printStackTrace();
+
+                        } catch (CsvValidationException e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        Toast.makeText(this, "Failed to get data", Toast.LENGTH_SHORT).show();
+                    }
+
                 }
             }
-            else {
-                Toast.makeText(this, "Failed to get data" , Toast.LENGTH_SHORT).show();
-            }
         }
-
-        else if (reqCode == 11 && resultCode == RESULT_OK
-                && data != null && data.getData() != null) {
-            String filePath = data.getData().getPath();
-            if(filePath.contains("/root_path"))
-            {
-                filePath = filePath.replace("/root_path","");
-            }
-            else if(filePath.contains("/document/primary:"))
-            {
-                filePath = filePath.replace("/document/primary:","");
-                filePath = Environment.getExternalStorageDirectory()+"/"+filePath;
-            }
-            Log.d(TAG, "onActivityResult: "+filePath);
-            File csvFile = new File(filePath);
-            if (csvFile.exists()){
-                try {
-                    MyDatabaseHelper helper = new MyDatabaseHelper(this);
-                    SQLiteDatabase db = helper.getWritableDatabase();
-                    CSVReader csvReader = new CSVReader(new FileReader(csvFile.getAbsolutePath()));
-                    String[] nextLine;
-                    while ((nextLine=csvReader.readNext()) != null){
-                        ContentValues values = new ContentValues();
-                        values.put(MyDatabaseHelper.KEY_ID,nextLine[0]);
-                        values.put(MyDatabaseHelper.CONTACT_ID,nextLine[1]);
-                        values.put(MyDatabaseHelper.EVENT,nextLine[2]);
-                        values.put(MyDatabaseHelper.ROW,nextLine[3]);
-                        values.put(MyDatabaseHelper.DES,nextLine[4]);
-                        values.put(MyDatabaseHelper.REM_1,nextLine[5]);
-                        values.put(MyDatabaseHelper.REM_2,nextLine[6]);
-                        values.put(MyDatabaseHelper.NOTIFY,nextLine[7]);
-                        values.put(MyDatabaseHelper.DATE,nextLine[8]);
-                        values.put(MyDatabaseHelper.STATUS,nextLine[9]);
-
-                        long insertId = db.insert(MyDatabaseHelper.TABLE1_NAME,null,values);
-                    }
-                    Toast.makeText(this,"Imported Successfully..",Toast.LENGTH_SHORT).show();
-                    db.close();
-                } catch (IOException e) {
-                    Toast.makeText(this,"Failed "+e.getMessage(),Toast.LENGTH_SHORT).show();
-                    e.printStackTrace();
-
-                } catch (CsvValidationException e) {
-                    e.printStackTrace();
-                }
-            }
-            else {
-                Toast.makeText(this, "Failed to get data" , Toast.LENGTH_SHORT).show();
-            }
-        }
-        else {
-            if (resultCode == RESULT_OK) {
-                if (reqCode == SELECT_FILE)
-                    onSelectFromGalleryResult(data);
-                else if (reqCode == REQUEST_CAMERA)
-                    onCaptureImageResult(data);
-
-            } else {
-                Toast.makeText(MainActivity.this, "You haven't picked anything", Toast.LENGTH_LONG).show();
-            }
-        }
-    }
-
-
-    private void saveImage() {
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        Bitmap bm = ((BitmapDrawable) ppImageView.getDrawable()).getBitmap();
-        if (bm.getWidth() > bm.getHeight()) {
-            int ratio = bm.getWidth() / bm.getHeight();
-            bm = Bitmap.createScaledBitmap(bm, 200 * ratio, 200, true);
-        } else {
-            int ratio = bm.getHeight() / bm.getWidth();
-            bm = Bitmap.createScaledBitmap(bm, 200, 200 * ratio, true);
-        }
-        bm.compress(Bitmap.CompressFormat.PNG, 100, stream);
-        byte[] b = stream.toByteArray();
-        String encodedImage = Base64.encodeToString(b, Base64.DEFAULT);
-        SharedPreferences.Editor edit = sharedpreferences.edit();
-        edit.putString("pp_data", encodedImage);
-        edit.apply();
-
     }
 
     private void onCaptureImageResult(Intent data) {
-        Bitmap bm = (Bitmap) data.getExtras().get("data");
-        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        if (bm.getWidth() > bm.getHeight()) {
-            int ratio = bm.getWidth() / bm.getHeight();
-            bm = Bitmap.createScaledBitmap(bm, 200 * ratio, 200, true);
-        } else {
-            int ratio = bm.getHeight() / bm.getWidth();
-            bm = Bitmap.createScaledBitmap(bm, 200, 200 * ratio, true);
-        }
-        bm.compress(Bitmap.CompressFormat.PNG, 100, bytes);
 
-        File destination = new File(Environment.getExternalStorageDirectory(),
-                System.currentTimeMillis() + ".jpg");
 
-        FileOutputStream fo;
-        try {
-            destination.createNewFile();
-            fo = new FileOutputStream(destination);
-            destination.getAbsolutePath();
-            fo.write(bytes.toByteArray());
-            fo.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        ppImageView.setImageBitmap(bm);
-        byte[] b = bytes.toByteArray();
-        String encodedImage = Base64.encodeToString(b, Base64.DEFAULT);
-        SharedPreferences.Editor edit = sharedpreferences.edit();
-        edit.putString("pp_data", encodedImage);
-        edit.apply();
+            Bitmap bitmap = (Bitmap) data.getExtras().get("data");
+            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, bytes);
+//                Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
+            if (bitmap.getWidth() > bitmap.getHeight()) {
+                int ratio = bitmap.getWidth() / bitmap.getHeight();
+                bitmap = Bitmap.createScaledBitmap(bitmap, 200 * ratio, 200, true);
+            } else {
+                int ratio = bitmap.getHeight() / bitmap.getWidth();
+                bitmap = Bitmap.createScaledBitmap(bitmap, 200, 200 * ratio, true);
+            }
+            ppImageView.setImageBitmap(bitmap);
+            saveToInternalStorage(bitmap);
+//        Log.d(TAG, "onCaptureImageResult: ");
+//        Bitmap thumbnail = (Bitmap) data.getExtras().get("data");
+//        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+//        thumbnail.compress(Bitmap.CompressFormat.JPEG, 90, bytes);
+//
+//        File destination = new File(Environment.getExternalStorageDirectory(),
+//                System.currentTimeMillis() + ".jpg");
+//
+//        FileOutputStream fo;
+//        try {
+//            destination.createNewFile();
+//            fo = new FileOutputStream(destination);
+//            destination.getAbsolutePath();
+//            fo.write(bytes.toByteArray());
+//            fo.close();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        ppImageView.setImageBitmap(thumbnail);
     }
 
     @SuppressWarnings("deprecation")
     private void onSelectFromGalleryResult(Intent data) {
-
-        Bitmap bm = null;
         if (data != null) {
+            Uri imageUri = data.getData();
             try {
-                bm = MediaStore.Images.Media.getBitmap(getApplicationContext().getContentResolver(), data.getData());
-                int ratio = bm.getHeight() / bm.getWidth();
-                bm = Bitmap.createScaledBitmap(bm, 200, 200 * ratio, true);
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                bm.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-                byte[] b = baos.toByteArray();
-                String encodedImage = Base64.encodeToString(b, Base64.DEFAULT);
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
+                if (bitmap.getWidth() > bitmap.getHeight()) {
+                    int ratio = bitmap.getWidth() / bitmap.getHeight();
+                    bitmap = Bitmap.createScaledBitmap(bitmap, 200 * ratio, 200, true);
+                } else {
+                    int ratio = bitmap.getHeight() / bitmap.getWidth();
+                    bitmap = Bitmap.createScaledBitmap(bitmap, 200, 200 * ratio, true);
+                }
+                ppImageView.setImageBitmap(bitmap);
+                saveToInternalStorage(bitmap);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
-                SharedPreferences.Editor edit = sharedpreferences.edit();
-                edit.putString("pp_data", encodedImage);
-                edit.apply();
+        }
+    }
+
+    private String saveToInternalStorage(Bitmap bitmapImage) {
+        ContextWrapper cw = new ContextWrapper(getApplicationContext());
+        // path to /data/data/yourapp/app_data/imageDir
+        File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
+        // Create imageDir
+        File mypath = new File(directory, "profile.jpg");
+
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(mypath);
+            // Use the compress method on the BitMap object to write image to the OutputStream
+            bitmapImage.compress(Bitmap.CompressFormat.PNG, 100, fos);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                fos.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-        ppImageView.setImageBitmap(bm);
-        saveImage();
+        Log.d(TAG, "saveToInternalStorage: " + directory.getAbsolutePath());
+        return directory.getAbsolutePath();
     }
 
+    private void loadImageFromStorage(String path) {
+        try {
+            File f = new File(path, "profile.jpg");
+            Bitmap b = BitmapFactory.decodeStream(new FileInputStream(f));
+            Glide.with(this).asBitmap().load(b).into(ppImageView);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+    }
 }

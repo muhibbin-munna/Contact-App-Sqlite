@@ -38,7 +38,7 @@
                 android:layout_height="wrap_content" />
             <EditText
                 android:layout_marginTop="5dp"
-                android:inputType="number"
+                android:inputType="phone"
                 android:hint="Phone number"
                 android:id="@+id/phoneNoEditTextUpdate"
                 android:layout_width="match_parent"
@@ -78,6 +78,7 @@
                     android:layout_weight="1"
                     android:layout_gravity="center"
                     android:textSize="18sp"
+                    android:id="@+id/dob_tv_update"
                     />
 
 <!--                <DatePicker-->
@@ -88,12 +89,15 @@
 <!--                    android:datePickerMode="spinner"-->
 <!--                    android:spinnersShown="true"-->
 <!--                    android:layout_weight="1" />-->
-                <Button
+                <ImageButton
                     android:id="@+id/dateButtonUpdate"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Change Date" />
+                    android:background="@drawable/image_button_bg"
+                    android:src="@drawable/ic_calendar"
+                    android:padding="12dp"
+                    />
             </LinearLayout>
             <EditText
                 android:layout_marginTop="5dp"
