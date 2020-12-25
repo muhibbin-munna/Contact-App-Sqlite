@@ -1,4 +1,4 @@
-package com.app.contactappsp;
+package com.app.contactappsp.Adapters;
 
 import android.content.Context;
 import android.content.Intent;
@@ -8,23 +8,31 @@ import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
+import android.widget.SectionIndexer;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.app.contactappsp.Models.Contact;
+import com.app.contactappsp.Listener.ContactClickListner;
+import com.app.contactappsp.ContactDetailsActivity;
+import com.app.contactappsp.R;
+
 import java.util.ArrayList;
+import java.util.List;
 
-public class ContactAdapterRecyclerView extends RecyclerView.Adapter<ContactAdapterRecyclerView.ViewHolder> {
+import de.hdodenhof.circleimageview.CircleImageView;
 
+public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHolder> implements SectionIndexer {
     private final Context context;
     private final ArrayList<Contact> contacts;
     private final ContactClickListner listner;
 
 
-    public ContactAdapterRecyclerView(Context context, ArrayList<Contact> contacts, ContactClickListner listner) {
+    private ArrayList<Integer> mSectionPositions;
+
+    public ContactAdapter(Context context, ArrayList<Contact> contacts, ContactClickListner listner) {
         this.context = context;
         this.contacts = contacts;
         this.listner = listner;
@@ -36,7 +44,7 @@ public class ContactAdapterRecyclerView extends RecyclerView.Adapter<ContactAdap
         /*LayoutInflater inflater = LayoutInflater.from(context);
         RelativeLayout layout= (RelativeLayout) inflater.inflate(R.layout.contact_list_items1,null);
         return new ViewHolder(layout);*/
-        View view =LayoutInflater.from(parent.getContext()).inflate(R.layout.single_contact_view,parent,false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.single_contact_view,parent,false);
         ViewHolder holder = new ViewHolder(view,context,contacts);
         return holder;
     }
@@ -62,9 +70,35 @@ public class ContactAdapterRecyclerView extends RecyclerView.Adapter<ContactAdap
         return contacts.size();
     }
 
+    @Override
+    public Object[] getSections() {
+        List<String> sections = new ArrayList<>(26);
+        mSectionPositions = new ArrayList<>(26);
+        for (int i = 0, size = contacts.size(); i < size; i++) {
+            if(!contacts.get(i).getFullName().equals("")) {
+                String section = String.valueOf(contacts.get(i).getFullName().charAt(0)).toUpperCase();
+                if (!sections.contains(section)) {
+                    sections.add(section);
+                    mSectionPositions.add(i);
+                }
+            }
+        }
+        return sections.toArray(new String[0]);
+    }
+
+    @Override
+    public int getPositionForSection(int sectionIndex) {
+        return mSectionPositions.get(sectionIndex);
+    }
+
+    @Override
+    public int getSectionForPosition(int position) {
+        return 0;
+    }
+
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
-        ImageView imageView;
+        CircleImageView imageView;
         TextView fName,number;
         ArrayList<Contact>contacts = new ArrayList<Contact>();
         Context context;
@@ -82,15 +116,11 @@ public class ContactAdapterRecyclerView extends RecyclerView.Adapter<ContactAdap
 
         @Override
         public void onClick(View v) {
-//            Toast.makeText(context, ""+getAdapterPosition(), Toast.LENGTH_SHORT).show();
             int position = getAdapterPosition();
             Contact contact = this.contacts.get(position);
             Intent intent= new Intent(this.context, ContactDetailsActivity.class);
-//            intent.putExtra("contact",contact.getId());
             intent.putExtra("contact",contact.getId());
             this.context.startActivity(intent);
         }
     }
-
-
 }

@@ -22,6 +22,9 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.app.contactappsp.Databases.MyDatabaseHelper;
+import com.app.contactappsp.Models.MyRemarkDetails;
+
 import java.util.Calendar;
 
 public class EditRemarkActivity extends AppCompatActivity implements DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener {
@@ -206,7 +209,7 @@ public class EditRemarkActivity extends AppCompatActivity implements DatePickerD
     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
         myHour = hourOfDay;
         myMinute = minute;
-//        setAlarm(myYear, myMonth, myday, myHour, myMinute, "");
+
         if (hourOfDay > 12) {
             int time = (hourOfDay - 12);
             if (minute < 10) {

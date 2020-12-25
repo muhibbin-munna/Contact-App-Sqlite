@@ -17,7 +17,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,6 +28,13 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.app.contactappsp.Adapters.RemarkAdapter;
+import com.app.contactappsp.Databases.DbHelper;
+import com.app.contactappsp.Databases.MyDatabaseHelper;
+import com.app.contactappsp.Models.Contact;
+import com.app.contactappsp.Models.MyRemarkDetails;
+import com.makeramen.roundedimageview.RoundedImageView;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -38,13 +44,12 @@ import java.util.List;
 
 public class ContactDetailsActivity extends AppCompatActivity implements View.OnClickListener, RemarkAdapter.OnItemClickListener {
     TextView fullName, phone, gender, age, address1, address2, city, postCode, remark;
-    ImageView imageView;
+    RoundedImageView imageView;
     Contact contact;
     ImageButton call, message, mail;
     RecyclerView remarkRV;
     TextView event1, event2, event3;
     List<MyRemarkDetails> userList = new ArrayList<>();
-    //    MyRemarkDetails[] array = new MyRemarkDetails[20];
     MyDatabaseHelper myDatabaseHelper;
     String TAG = "ContactDetailsActivity";
     int event = 1;
@@ -86,7 +91,6 @@ public class ContactDetailsActivity extends AppCompatActivity implements View.On
 
         Intent intent = getIntent();
         event = intent.getIntExtra("event", 1);
-//        pos = intent.getIntExtra("row", 1);
 
         editTv.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -96,7 +100,7 @@ public class ContactDetailsActivity extends AppCompatActivity implements View.On
         });
         call = findViewById(R.id.buttonCall);
         message = findViewById(R.id.buttonMessage);
-//        mail =(ImageButton) findViewById(R.id.buttonEmail);
+
 
         setData();
 
@@ -129,7 +133,7 @@ public class ContactDetailsActivity extends AppCompatActivity implements View.On
 
     private void load(int i) {
         userList.clear();
-//        array = new MyRemarkDetails[20];
+
         Cursor cursor = myDatabaseHelper.read_event_2(String.valueOf(contact.getId()));
         if (i == 1) {
             cursor = myDatabaseHelper.read_event_1(String.valueOf(contact.getId()));
@@ -153,10 +157,10 @@ public class ContactDetailsActivity extends AppCompatActivity implements View.On
                 contactDetails.setDate(cursor.getString(8));
                 contactDetails.setStatus(cursor.getString(9));
                 userList.add(contactDetails);
-//                array[Integer.parseInt(cursor.getString(3))] = contactDetails;
+
             }
         }
-//        userList.addAll(Arrays.asList(array).subList(0, 20));
+
         Log.d(TAG, "load: " + userList.size());
         cursor.close();
         Collections.sort(
@@ -296,6 +300,9 @@ public class ContactDetailsActivity extends AppCompatActivity implements View.On
         Log.v("TAG", "Contact deleted " + result + " " + id);
         Toast.makeText(this, "Contact deleted ", Toast.LENGTH_SHORT).show();
         db.close();
+        SQLiteDatabase sqLiteDatabase = myDatabaseHelper.getWritableDatabase();
+        int i = myDatabaseHelper.deleteData(String.valueOf(id));
+
         finish();
     }
 
@@ -369,50 +376,6 @@ public class ContactDetailsActivity extends AppCompatActivity implements View.On
         }
     }
 
-//    @Override
-//    public void setOnRemarkClickListener(int position, View v) {
-//        pos = position;
-//        if (v.getId() == R.id.notifyCB) {
-//            notifyCB = (ImageView) v;
-//            boolean found = false;
-//            Log.d(TAG, "setOnRemarkClickListener: " + userList.size());
-//            for (int i = 0; i < userList.size(); i++) {
-//                if (userList.get(i) != null && Integer.parseInt(userList.get(i).getRow()) == position) {
-//                    found = true;
-//                }
-//            }
-//            if (!found) {
-//                Toast.makeText(this, "Add the event first", Toast.LENGTH_SHORT).show();
-//            } else {
-//                if (notifyCB.isSelected()) {
-//                    notifyCB.setSelected(false);
-//                    myDatabaseHelper.updateNotification(userList.get(position).getId(), "0");
-////                    contactAdapter.notifyDataSetChanged();
-//                    load(event);
-//                    String req_code = "" + userList.get(pos).getEvent() + userList.get(pos).getRow();
-//                    Log.d(TAG, "setOnRemarkClickListener: "+userList.get(position).getId());
-//
-//                    Intent intent = new Intent(this, NotificationReceiver.class);
-//                    boolean isWorking = (PendingIntent.getBroadcast(this, Integer.parseInt(req_code), intent, PendingIntent.FLAG_NO_CREATE) != null);
-//                    if (isWorking) {
-//                        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, Integer.parseInt(req_code), intent, PendingIntent.FLAG_UPDATE_CURRENT);
-//                        AlarmManager alarmMgr = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
-//                        alarmMgr.cancel(pendingIntent);
-////                        contactAdapter.notifyDataSetChanged();
-//                        load(event);
-//                        Log.d(TAG, "setOnRemarkClickListener: cancel alarm");
-//                    }
-//                } else {
-//                    Calendar calendar = Calendar.getInstance();
-//                    year = calendar.get(Calendar.YEAR);
-//                    month = calendar.get(Calendar.MONTH);
-//                    day = calendar.get(Calendar.DAY_OF_MONTH);
-//                    DatePickerDialog datePickerDialog = new DatePickerDialog(ContactDetailsActivity.this, ContactDetailsActivity.this, year, month, day);
-//                    datePickerDialog.show();
-//                }
-//            }
-//        }
-//    }
 
     @Override
     public void setOnRemarkClickListener(int position, View v) {
@@ -469,88 +432,4 @@ public class ContactDetailsActivity extends AppCompatActivity implements View.On
         remarkRV.scrollToPosition(pos);
     }
 
-
-    //    @Override
-//    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-//        myYear = year;
-//        myday = day;
-//        myMonth = month;
-//        Calendar c = Calendar.getInstance();
-//        hour = c.get(Calendar.HOUR);
-//        minute = c.get(Calendar.MINUTE);
-//        TimePickerDialog timePickerDialog = new TimePickerDialog(ContactDetailsActivity.this, ContactDetailsActivity.this, hour, minute, DateFormat.is24HourFormat(this));
-//        timePickerDialog.show();
-//    }
-//
-//    @Override
-//    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-//        myHour = hourOfDay;
-//        myMinute = minute;
-//        Log.d(TAG, "onTimeSet: " + "Year: " + myYear + "\n" +
-//                "Month: " + myMonth + "\n" +
-//                "Day: " + myday + "\n" +
-//                "Hour: " + myHour + "\n" +
-//                "Minute: " + myMinute);
-//        setAlarm(myYear, myMonth, myday, myHour, myMinute, "");
-//
-//
-//    }
-
-//    private void setAlarm(int year, int monthAlarm, int dateAlarm, int hourAlarm, int minuteAlarm, String timeAlarm) {
-//        Calendar calendar = Calendar.getInstance();
-//        calendar.setTimeInMillis(System.currentTimeMillis());
-//        calendar.set(Calendar.DATE, dateAlarm);
-//        calendar.set(Calendar.MONTH, monthAlarm);
-//        calendar.set(Calendar.YEAR, year);
-//        calendar.set(Calendar.HOUR_OF_DAY, hourAlarm);
-//        calendar.set(Calendar.MINUTE, minuteAlarm);
-//        calendar.set(Calendar.SECOND, 1);
-//
-//        String req_code = "" + userList.get(pos).getEvent() + userList.get(pos).getRow();
-//
-//        Log.d(TAG, "setAlarm: pos " + pos);
-//
-//        if (calendar.getTimeInMillis() > System.currentTimeMillis()) {
-//            Intent intent = new Intent(this, NotificationReceiver.class);
-//            boolean isWorking = (PendingIntent.getBroadcast(this, Integer.parseInt(req_code), intent, PendingIntent.FLAG_NO_CREATE) != null);//just changed the flag
-//            if (!isWorking) {
-//                Log.d(TAG, "setAlarm: reqCode " + req_code);
-//                intent.putExtra("timeAlarm", timeAlarm);
-//                PendingIntent pendingIntent = PendingIntent.getBroadcast(this, Integer.parseInt(req_code), intent, PendingIntent.FLAG_UPDATE_CURRENT);
-//                AlarmManager alarmMgr = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
-//                alarmMgr.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
-//                myDatabaseHelper.updateNotification(userList.get(pos).getId(), ""+calendar.getTimeInMillis());
-////                contactAdapter.notifyDataSetChanged();
-//                load(event);
-//                Log.d(TAG, "setAlarm: calender " + calendar.getTimeInMillis());
-//                Log.d(TAG, "setAlarm: Id: "+ userList.get(pos).getId());
-//            } else {
-//                Log.d(TAG, "setAlarm: alam already setted " + req_code);
-//            }
-//        }
-//    }
-
-//    @Override
-//    public void applyTexts(String row_index, String description, String date, String status,String notify, String remark1, String remark2) {
-//        myDatabaseHelper.insertDetailsData(String.valueOf(event), row_index, String.valueOf(contact.getId()), description, remark1, remark2, notify, date, status);
-//        load(event);
-//    }
-//
-//    @Override
-//    public void updateTexts(String id, String description, String date, String status, String notify, String remark1, String remark2) {
-//        boolean i = myDatabaseHelper.updateData(id, description, remark1, remark2, date, status);
-//        myDatabaseHelper.updateNotification(id,notify);
-//        Log.d(TAG, "updateTexts: updated " + i + "id = " + id + "userid: " + contact.getId() + " " + userList.get(pos).getId());
-//        load(event);
-//
-//    }
-
-//    public void email(View view){
-//        Contact contact = getData();
-//        String email=contact.getEmail();
-//        Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts( "mailto",email, null));
-//        emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Subject");
-//        emailIntent.putExtra(Intent.EXTRA_TEXT, "Body");
-//        startActivity(Intent.createChooser(emailIntent, "Send email..."));
-//    }
 }

@@ -14,6 +14,10 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.app.contactappsp.Adapters.RemarkAdapterHome;
+import com.app.contactappsp.Databases.MyDatabaseHelper;
+import com.app.contactappsp.Models.MyRemarkDetails;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -90,11 +94,17 @@ public class RemarkHomeFragment extends Fragment implements RemarkAdapterHome.On
             remarkAdapterHome.setOnRemarkClickListener(this);
             if (userList.size() == 0) {
                 {
+                    remarkAdapterHome = new RemarkAdapterHome(userList, getContext());
+                    remarkRV.setLayoutManager(new LinearLayoutManager(getContext()));
+                    remarkRV.setAdapter(remarkAdapterHome);
                     noNotificationDisplay.setText("No Notification");
                     noNotificationDisplay.setVisibility(View.VISIBLE);
                 }
             }
         } else {
+            remarkAdapterHome = new RemarkAdapterHome(userList, getContext());
+            remarkRV.setLayoutManager(new LinearLayoutManager(getContext()));
+            remarkRV.setAdapter(remarkAdapterHome);
             noNotificationDisplay.setText("No Notification");
             noNotificationDisplay.setVisibility(View.VISIBLE);
         }

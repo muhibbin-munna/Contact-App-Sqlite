@@ -1,4 +1,4 @@
-package com.app.contactappsp;
+package com.app.contactappsp.Databases;
 
 import android.content.Context;
 import android.database.Cursor;

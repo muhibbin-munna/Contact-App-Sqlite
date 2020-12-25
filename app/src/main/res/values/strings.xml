@@ -3,7 +3,6 @@
     <array name="gender">
         <item>Male</item>
         <item>Female</item>
-        <item>Others</item>
     </array>
     <string name="notification_area">NOTIFICATION AREA\n
         (DISPLAY CONTACT NAME+DESCRIPTON+DATE+STATUS)\n

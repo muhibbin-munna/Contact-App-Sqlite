@@ -28,6 +28,10 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.app.contactappsp.Databases.DbHelper;
+import com.app.contactappsp.Models.Utility;
+import com.bumptech.glide.Glide;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -39,7 +43,6 @@ public class AddActivity extends AppCompatActivity implements DatePickerDialog.O
     EditText fullName, phone, age, address1, address2, city, postCode, remark;
     TextView dobtv;
     Spinner genderSpinnerText;
-    //    DatePicker datePicker;
     ImageButton dateButton;
     ImageView imageView;
     private String userChoosenTask;
@@ -54,9 +57,7 @@ public class AddActivity extends AppCompatActivity implements DatePickerDialog.O
         setContentView(R.layout.activity_add);
         fullName = findViewById(R.id.fullNameEditText);
         phone = findViewById(R.id.phoneNoEditText);
-//        gender = findViewById(R.id.genderEditText);
-//        age = findViewById(R.id.ageEditText);
-//        datePicker = findViewById(R.id.datePickerId);
+
         dateButton = findViewById(R.id.dateButton);
         genderSpinnerText = findViewById(R.id.genderSpinnerId);
         address1 = findViewById(R.id.addressLine1EditText);
@@ -82,15 +83,11 @@ public class AddActivity extends AppCompatActivity implements DatePickerDialog.O
                 year = calendar.get(Calendar.YEAR);
                 month = calendar.get(Calendar.MONTH);
                 day = calendar.get(Calendar.DAY_OF_MONTH);
-//                DatePickerDialog datePickerDialog = new DatePickerDialog(AddActivity.this,android.R.style.Theme_Holo_Light_Dialog, AddActivity.this, year, month, day);
-//                datePickerDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
                 DatePickerDialog datePickerDialog = new DatePickerDialog(AddActivity.this, AddActivity.this, year, month, day);
                 datePickerDialog.show();
             }
         });
 
-//        ActionBar actionBar = getSupportActionBar();
-//        actionBar.setDisplayHomeAsUpEnabled(true);
     }
 
     @Override
@@ -132,6 +129,7 @@ public class AddActivity extends AppCompatActivity implements DatePickerDialog.O
     }
 
     private void onCaptureImageResult(Intent data) {
+
         Bitmap thumbnail = (Bitmap) data.getExtras().get("data");
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         thumbnail.compress(Bitmap.CompressFormat.JPEG, 90, bytes);
@@ -157,17 +155,8 @@ public class AddActivity extends AppCompatActivity implements DatePickerDialog.O
 
     @SuppressWarnings("deprecation")
     private void onSelectFromGalleryResult(Intent data) {
+        Glide.with(this).load(data.getData()).into(imageView);
 
-        Bitmap bm = null;
-        if (data != null) {
-            try {
-                bm = MediaStore.Images.Media.getBitmap(getApplicationContext().getContentResolver(), data.getData());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        imageView.setImageBitmap(bm);
     }
 
     private void selectImage() {
@@ -233,11 +222,11 @@ public class AddActivity extends AppCompatActivity implements DatePickerDialog.O
         String result = Base64.encodeToString(arr1, Base64.DEFAULT);
 
         if (fullName.getText().toString().isEmpty()) {
-            fullName.setError("Enter a Phone no");
+            fullName.setError("Insert Name");
             fullName.requestFocus();
             return 0;
         }else if(phone.getText().toString().isEmpty()){
-            phone.setError("Enter a Phone no");
+            phone.setError("Insert Phone Number");
             phone.requestFocus();
             return 0;
         }else {
@@ -269,20 +258,7 @@ public class AddActivity extends AppCompatActivity implements DatePickerDialog.O
     @SuppressLint("SetTextI18n")
     @Override
     public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-//        month = monthhere + 1;
-//        if (dayOfMonth < 10) {
-//            daystr = "0" + dayOfMonth;
-//        } else {
-//            daystr = "" + dayOfMonth;
-//        }
-//        if (month < 10) {
-//            monthstr = "0" + month;
-//        } else {
-//            monthstr = "" + month;
-//        }
-//        yearstr = "" + year;
-//
-//        yearstr = ""+year;
+
 
         Calendar calendar = Calendar.getInstance();
         calendar.set(year,month,dayOfMonth);

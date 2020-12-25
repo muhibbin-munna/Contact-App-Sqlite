@@ -13,7 +13,8 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -31,19 +32,29 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.fragment.app.Fragment;
 
+import com.app.contactappsp.Databases.CSVWriter;
+import com.app.contactappsp.Databases.DbHelper;
+import com.app.contactappsp.Databases.MyDatabaseHelper;
+import com.app.contactappsp.Models.Contact;
+import com.app.contactappsp.Models.Utility;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -114,13 +125,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
         }
-//        String previouslyEncodedImage = sharedpreferences.getString("pp_data", "");
-//        if (!previouslyEncodedImage.equalsIgnoreCase("")) {
-//            byte[] b = Base64.decode(previouslyEncodedImage, Base64.DEFAULT);
-//            Bitmap bitmap = BitmapFactory.decodeByteArray(b, 0, b.length);
-//            ppImageView.setImageBitmap(bitmap);
-//        }
-        loadImageFromStorage(getApplicationContext().getFilesDir().getParentFile().getPath() + "/app_imageDir");
+
+        loadImageFromStorage();
 
         name.setText(namePref);
         remark1.setText(remark1Pref);
@@ -587,71 +593,57 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void onCaptureImageResult(Intent data) {
-
-
-            Bitmap bitmap = (Bitmap) data.getExtras().get("data");
-            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, bytes);
-//                Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
-            if (bitmap.getWidth() > bitmap.getHeight()) {
-                int ratio = bitmap.getWidth() / bitmap.getHeight();
-                bitmap = Bitmap.createScaledBitmap(bitmap, 200 * ratio, 200, true);
-            } else {
-                int ratio = bitmap.getHeight() / bitmap.getWidth();
-                bitmap = Bitmap.createScaledBitmap(bitmap, 200, 200 * ratio, true);
-            }
-            ppImageView.setImageBitmap(bitmap);
-            saveToInternalStorage(bitmap);
-//        Log.d(TAG, "onCaptureImageResult: ");
-//        Bitmap thumbnail = (Bitmap) data.getExtras().get("data");
-//        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-//        thumbnail.compress(Bitmap.CompressFormat.JPEG, 90, bytes);
-//
-//        File destination = new File(Environment.getExternalStorageDirectory(),
-//                System.currentTimeMillis() + ".jpg");
-//
-//        FileOutputStream fo;
-//        try {
-//            destination.createNewFile();
-//            fo = new FileOutputStream(destination);
-//            destination.getAbsolutePath();
-//            fo.write(bytes.toByteArray());
-//            fo.close();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        ppImageView.setImageBitmap(thumbnail);
+        Bitmap thumbnail = (Bitmap) data.getExtras().get("data");
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        thumbnail.compress(Bitmap.CompressFormat.JPEG, 90, bytes);
+        File destination = new File(Environment.getExternalStorageDirectory(),
+                System.currentTimeMillis() + ".jpg");
+        FileOutputStream fo;
+        try {
+            destination.createNewFile();
+            fo = new FileOutputStream(destination);
+            destination.getAbsolutePath();
+            fo.write(bytes.toByteArray());
+            fo.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        ppImageView.setImageBitmap(thumbnail);
+        saveToInternalStorage(thumbnail);
     }
 
     @SuppressWarnings("deprecation")
     private void onSelectFromGalleryResult(Intent data) {
-        if (data != null) {
-            Uri imageUri = data.getData();
-            try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
-                if (bitmap.getWidth() > bitmap.getHeight()) {
-                    int ratio = bitmap.getWidth() / bitmap.getHeight();
-                    bitmap = Bitmap.createScaledBitmap(bitmap, 200 * ratio, 200, true);
+        Glide.with(this).load(data.getData()).into(new SimpleTarget<Drawable>() {
+            @Override
+            public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+                ppImageView.setImageDrawable(resource);
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                Bitmap bm = ((BitmapDrawable) ppImageView.getDrawable()).getBitmap();
+                if (bm.getWidth() > bm.getHeight()) {
+                    int ratio = bm.getWidth() / bm.getHeight();
+                    bm = Bitmap.createScaledBitmap(bm, 200 * ratio, 200, true);
                 } else {
-                    int ratio = bitmap.getHeight() / bitmap.getWidth();
-                    bitmap = Bitmap.createScaledBitmap(bitmap, 200, 200 * ratio, true);
+                    int ratio = bm.getHeight() / bm.getWidth();
+                    bm = Bitmap.createScaledBitmap(bm, 200, 200 * ratio, true);
                 }
-                ppImageView.setImageBitmap(bitmap);
-                saveToInternalStorage(bitmap);
-            } catch (IOException e) {
-                e.printStackTrace();
+                bm.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                saveToInternalStorage(bm);
             }
+        });
 
-        }
     }
 
     private String saveToInternalStorage(Bitmap bitmapImage) {
         ContextWrapper cw = new ContextWrapper(getApplicationContext());
-        // path to /data/data/yourapp/app_data/imageDir
         File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
-        // Create imageDir
         File mypath = new File(directory, "profile.jpg");
-
+        if(mypath.exists())
+        {
+            mypath.delete();
+        }
         FileOutputStream fos = null;
         try {
             fos = new FileOutputStream(mypath);
@@ -670,14 +662,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return directory.getAbsolutePath();
     }
 
-    private void loadImageFromStorage(String path) {
-        try {
-            File f = new File(path, "profile.jpg");
-            Bitmap b = BitmapFactory.decodeStream(new FileInputStream(f));
-            Glide.with(this).asBitmap().load(b).into(ppImageView);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-
+    private void loadImageFromStorage() {
+        String path = getApplicationContext().getFilesDir().getParentFile().getPath() + "/app_imageDir";
+        Glide.with(this).load(new File(path,"profile.jpg"))
+                .placeholder(R.drawable.contacts_icon)
+                .apply(RequestOptions.skipMemoryCacheOf(true))
+                .apply(RequestOptions.diskCacheStrategyOf(DiskCacheStrategy.NONE))
+                .into(ppImageView);
     }
 }

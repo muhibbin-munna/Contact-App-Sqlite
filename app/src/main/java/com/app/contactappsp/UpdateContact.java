@@ -30,6 +30,10 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.app.contactappsp.Databases.DbHelper;
+import com.app.contactappsp.Models.Contact;
+import com.app.contactappsp.Models.Utility;
+import com.bumptech.glide.Glide;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.ByteArrayOutputStream;
@@ -153,16 +157,8 @@ public class UpdateContact extends AppCompatActivity implements DatePickerDialog
     @SuppressWarnings("deprecation")
     private void onSelectFromGalleryResult(Intent data) {
 
-        Bitmap bm = null;
-        if (data != null) {
-            try {
-                bm = MediaStore.Images.Media.getBitmap(getApplicationContext().getContentResolver(), data.getData());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+        Glide.with(this).load(data.getData()).into(imageButton);
 
-        imageButton.setImageBitmap(bm);
     }
 
     private void selectImage() {
@@ -274,14 +270,14 @@ public class UpdateContact extends AppCompatActivity implements DatePickerDialog
         city.setText(contact.getCity());
         postCode.setText(contact.getPostCode());
         remark.setText(contact.getRemark());
-
         postCode.setText(contact.getPostCode());
         if (contact.getImage() == null) {
             imageButton.setImageResource(R.drawable.contacts_icon);
         } else {
             byte[] arr = Base64.decode(contact.getImage(), Base64.DEFAULT);
             Bitmap bitmap = BitmapFactory.decodeByteArray(arr, 0, arr.length);
-            imageButton.setImageBitmap(bitmap);
+//            imageButton.setImageBitmap(bitmap);
+            Glide.with(this).asBitmap().load(bitmap).into(imageButton);
         }
     }
 
@@ -302,6 +298,7 @@ public class UpdateContact extends AppCompatActivity implements DatePickerDialog
             bm = Bitmap.createScaledBitmap(bm, 200, 200 * ratio, true);
         }
         bm.compress(Bitmap.CompressFormat.PNG, 100, stream);
+
         byte[] arr1 = stream.toByteArray();
         String result = Base64.encodeToString(arr1, Base64.DEFAULT);
 

@@ -13,6 +13,11 @@ import android.widget.TextView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.app.contactappsp.Adapters.ContactAdapter;
+import com.app.contactappsp.Databases.DbHelper;
+import com.app.contactappsp.Listener.ContactClickListner;
+import com.app.contactappsp.Models.Contact;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -23,21 +28,20 @@ import static com.app.contactappsp.MainActivity.no_of_contact;
 
 public class ContactListFragment extends Fragment implements ContactClickListner {
 
-//    RecyclerView recyclerView;
+
     IndexFastScrollRecyclerView recyclerView;
     static ArrayList<Contact> contacts = new ArrayList<>();
     ArrayList<Contact> searchList = new ArrayList<>();
-    //ContactAdapter adapter;
-//    ContactAdapterRecyclerView adapter;
+
     androidx.appcompat.widget.SearchView searchView;
-    ContactAdapter2 adapter;
+    ContactAdapter adapter;
     TextView noContactDisplay;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_contact_list, container, false);
-//        recyclerView = view.findViewById(R.id.recyclerView);
+
         noContactDisplay = view.findViewById(R.id.noContactDisplay);
         recyclerView = view.findViewById(R.id.fast_scroller_recycler);
         searchView = view.findViewById(R.id.search);
@@ -129,8 +133,8 @@ public class ContactListFragment extends Fragment implements ContactClickListner
             }
         });
 
-        //adapter = new ContactAdapterRecyclerView(this,contacts, listner);
-        adapter = new ContactAdapter2(getContext(), contactList,this);
+
+        adapter = new ContactAdapter(getContext(), contactList,this);
         recyclerView.setAdapter(adapter);
         recyclerView.setIndexbarWidth(40);
         recyclerView.setIndexTextSize(12);

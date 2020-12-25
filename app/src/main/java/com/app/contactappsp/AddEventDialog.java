@@ -25,6 +25,8 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatDialogFragment;
 
+import com.app.contactappsp.Models.MyRemarkDetails;
+
 import java.util.Calendar;
 
 public class AddEventDialog extends AppCompatDialogFragment implements DatePickerDialog.OnDateSetListener,TimePickerDialog.OnTimeSetListener{
@@ -74,7 +76,6 @@ public class AddEventDialog extends AppCompatDialogFragment implements DatePicke
                         String remark1 = edit_remark1.getText().toString();
                         String remark2 = edit_remark2.getText().toString();
                         if (has_data.equals("null")) {
-//                            Toast.makeText(getContext(), "null", Toast.LENGTH_SHORT).show();
                             listener.applyTexts(row_index,description, date, status, notify,remark1, remark2);
                             Log.d(TAG, "onClick: add "+ row_index +" "+description+" "+ date+" "+ status+" "+ notify+" "+remark1+" "+ remark2);
                             Toast.makeText(getContext(), "added  "+notify, Toast.LENGTH_SHORT).show();
@@ -104,9 +105,7 @@ public class AddEventDialog extends AppCompatDialogFragment implements DatePicke
 
                         if (notifyCB.isSelected()) {
                             notifyCB.setSelected(false);
-//                            myDatabaseHelper.updateNotification(user.getId(), "0");
-//                    contactAdapter.notifyDataSetChanged();
-//                            load(event);
+
                             notify = "0";
                             String req_code = "" + user.getEvent() + user.getRow();
 
@@ -116,7 +115,7 @@ public class AddEventDialog extends AppCompatDialogFragment implements DatePicke
                                 PendingIntent pendingIntent = PendingIntent.getBroadcast(getContext(), Integer.parseInt(req_code), intent, PendingIntent.FLAG_UPDATE_CURRENT);
                                 AlarmManager alarmMgr = (AlarmManager) getActivity().getSystemService(Context.ALARM_SERVICE);
                                 alarmMgr.cancel(pendingIntent);
-//                        contactAdapter.notifyDataSetChanged();
+
                             }
                         } else {
                             Calendar calendar = Calendar.getInstance();
@@ -213,9 +212,9 @@ public class AddEventDialog extends AppCompatDialogFragment implements DatePicke
                 PendingIntent pendingIntent = PendingIntent.getBroadcast(getContext(), Integer.parseInt(req_code), intent, PendingIntent.FLAG_UPDATE_CURRENT);
                 AlarmManager alarmMgr = (AlarmManager) getActivity().getSystemService(Context.ALARM_SERVICE);
                 alarmMgr.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
-//                myDatabaseHelper.updateNotification(userList.get(pos).getId(), ""+calendar.getTimeInMillis());
+
                 notify = ""+calendar.getTimeInMillis();
-//                contactAdapter.notifyDataSetChanged();
+
 
             } else {
                 Log.d("TAG", "setAlarm: alam already setted " + req_code);

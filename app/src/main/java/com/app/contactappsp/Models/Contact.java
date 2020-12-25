@@ -1,4 +1,4 @@
-package com.app.contactappsp;
+package com.app.contactappsp.Models;
 
 import android.os.Parcel;
 import android.os.Parcelable;

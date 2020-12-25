@@ -1,4 +1,4 @@
-package com.app.contactappsp;
+package com.app.contactappsp.Databases;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -79,7 +79,6 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
 
     public Cursor read_event_1(String contactId) {
         SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
-//        String sql = "SELECT * FROM "+TABLE1_NAME+ " WHERE "+CONTACT_ID+"='"+contactId+"'";
         String sql = "SELECT * FROM "+TABLE1_NAME+ " WHERE "+CONTACT_ID+"='"+contactId+"' AND "+EVENT+"= 1";
         Cursor cursor = sqLiteDatabase.rawQuery(sql,null,null);
         return cursor;
@@ -128,6 +127,10 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
         String sql = "SELECT * FROM "+TABLE1_NAME+ " WHERE "+NOTIFY+ " != 0";
         Cursor cursor = sqLiteDatabase.rawQuery(sql,null,null);
         return cursor;
+    }
+    public int deleteData(String id) {
+        SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+        return sqLiteDatabase.delete(TABLE1_NAME, CONTACT_ID+" = ?",new String[]{id});
     }
     public Cursor raw() {
 
