@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.app.contactappsp.Activities.ContactDetailsActivity;
 import com.app.contactappsp.Adapters.RemarkAdapterHome;
 import com.app.contactappsp.Databases.MyDatabaseHelper;
 import com.app.contactappsp.Models.MyRemarkDetails;
@@ -69,13 +70,22 @@ public class RemarkHomeFragment extends Fragment implements RemarkAdapterHome.On
                 contactDetails.setDate(cursor.getString(8));
                 contactDetails.setStatus(cursor.getString(9));
 
-                Calendar calendar = Calendar.getInstance();
-                calendar.setTimeInMillis(Long.parseLong(contactDetails.getNotify()));
-                if (calendar.get(Calendar.YEAR) == todayYear) {
-                    if (calendar.get(Calendar.DAY_OF_MONTH) == todayDay && calendar.get(Calendar.MONTH) == todayMonth) {
-                        userList.add(contactDetails);
-                    }
+                Calendar cal = Calendar.getInstance(); //current date and time
+                cal.set(Calendar.HOUR_OF_DAY, 23); //set hour to last hour
+                cal.set(Calendar.MINUTE, 59); //set minutes to last minute
+                cal.set(Calendar.SECOND, 59); //set seconds to last second
+                cal.set(Calendar.MILLISECOND, 999); //set milliseconds to last millisecond
+                long millis = cal.getTimeInMillis();
+                if (Long.parseLong(contactDetails.getNotify()) <= millis) {
+                    userList.add(contactDetails);
                 }
+//                Calendar calendar = Calendar.getInstance();
+//                calendar.setTimeInMillis(Long.parseLong(contactDetails.getNotify()));
+//                if (calendar.get(Calendar.YEAR) == todayYear) {
+//                    if (calendar.get(Calendar.DAY_OF_MONTH) == todayDay && calendar.get(Calendar.MONTH) == todayMonth) {
+//                        userList.add(contactDetails);
+//                    }
+//                }
 
             }
             Log.d("TAG", "load: " + userList.size());
@@ -84,7 +94,7 @@ public class RemarkHomeFragment extends Fragment implements RemarkAdapterHome.On
                     userList,
                     new Comparator<MyRemarkDetails>() {
                         public int compare(MyRemarkDetails lhs, MyRemarkDetails rhs) {
-                            return lhs.getNotify().compareTo(rhs.getNotify());
+                            return lhs.getDate().compareTo(rhs.getDate());
                         }
                     }
             );

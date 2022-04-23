@@ -1,9 +1,12 @@
 package com.app.contactappsp.Adapters;
 
+import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,10 +17,14 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.app.contactappsp.Models.Contact;
+import com.app.contactappsp.Activities.ContactDetailsActivity;
 import com.app.contactappsp.Listener.ContactClickListner;
-import com.app.contactappsp.ContactDetailsActivity;
+import com.app.contactappsp.Models.Contact;
 import com.app.contactappsp.R;
+import com.app.contactappsp.Utils.AMInterstitialAds;
+import com.app.contactappsp.Utils.Constants;
+import com.app.contactappsp.Utils.NetUtils;
+import com.app.contactappsp.Utils.interfacess.onInterstitialAdsClose;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +35,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
     private final Context context;
     private final ArrayList<Contact> contacts;
     private final ContactClickListner listner;
+    AMInterstitialAds amInterstitialAds;
 
 
     private ArrayList<Integer> mSectionPositions;
@@ -36,6 +44,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
         this.context = context;
         this.contacts = contacts;
         this.listner = listner;
+        amInterstitialAds = new AMInterstitialAds(context, true);
     }
 
     @NonNull
@@ -116,11 +125,84 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
 
         @Override
         public void onClick(View v) {
-            int position = getAdapterPosition();
-            Contact contact = this.contacts.get(position);
-            Intent intent= new Intent(this.context, ContactDetailsActivity.class);
-            intent.putExtra("contact",contact.getId());
-            this.context.startActivity(intent);
+            if (amInterstitialAds != null && NetUtils.isOnline(context) && !Constants.is_contactAd_shown) {
+                if (amInterstitialAds.isLoaded()) {
+                    new AsyncTask<Void, Void, Void>() {
+                        ProgressDialog dialog = new ProgressDialog(context);
+
+                        @SuppressLint("StaticFieldLeak")
+                        @Override
+                        protected void onPreExecute() {
+                            super.onPreExecute();
+
+                            dialog.setTitle("Showing Ads");
+                            dialog.setMessage("Please Wait...");
+                            dialog.setCancelable(false);
+                            dialog.show();
+                        }
+
+
+                        @Override
+                        protected Void doInBackground(Void... params) {
+                            try {
+                                Thread.sleep(500);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            return null;
+                        }
+
+                        @Override
+                        protected void onPostExecute(Void aVoid) {
+                            super.onPostExecute(aVoid);
+
+                            if (dialog != null && dialog.isShowing()) {
+                                dialog.dismiss();
+                            }
+
+
+                            //Show Ads Here
+                            try {
+                                if (amInterstitialAds != null) {
+                                    amInterstitialAds.showFullScreenAds(new onInterstitialAdsClose() {
+                                        public void onAdClosed() {
+
+                                            Constants.is_contactAd_shown = true;
+                                            //Start Activity Here
+                                            int position = getAdapterPosition();
+                                            Contact contact = contacts.get(position);
+                                            Intent intent= new Intent(context, ContactDetailsActivity.class);
+                                            intent.putExtra("contact",contact.getId());
+                                            context.startActivity(intent);
+
+
+                                        }
+                                    });
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+
+                        }
+                    }.execute();
+
+                } else {
+                    //Start Activity Here When Ads Not Loaded
+                    int position = getAdapterPosition();
+                    Contact contact = this.contacts.get(position);
+                    Intent intent= new Intent(this.context, ContactDetailsActivity.class);
+                    intent.putExtra("contact",contact.getId());
+                    this.context.startActivity(intent);
+                }
+            } else {
+                //Start Activity Here When Offline
+                int position = getAdapterPosition();
+                Contact contact = this.contacts.get(position);
+                Intent intent= new Intent(this.context, ContactDetailsActivity.class);
+                intent.putExtra("contact",contact.getId());
+                this.context.startActivity(intent);
+            }
+
         }
     }
 }

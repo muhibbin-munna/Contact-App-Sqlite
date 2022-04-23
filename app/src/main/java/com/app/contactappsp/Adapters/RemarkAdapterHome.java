@@ -61,6 +61,7 @@ public class RemarkAdapterHome extends RecyclerView.Adapter<RemarkAdapterHome.Re
                     holder.enableCB.setChecked(true);
                     String ap = "am";
 
+
                     Calendar calendar = Calendar.getInstance();
                     calendar.setTimeInMillis(Long.parseLong(contactVO.getNotify()));
                     if(calendar.get(Calendar.AM_PM) == Calendar.AM){
@@ -69,14 +70,20 @@ public class RemarkAdapterHome extends RecyclerView.Adapter<RemarkAdapterHome.Re
                     else {
                         ap="PM";
                     }
+                    int hour =  calendar.get(Calendar.HOUR);
+                    if(calendar.get(Calendar.HOUR)==0){
+                        hour = 12;
+                    }
+
 
                     holder.alarmDateTv.setText("Date: " + calendar.get(Calendar.DAY_OF_MONTH) + " " + monthName[calendar.get(Calendar.MONTH)] + " " + (calendar.get(Calendar.YEAR)%100));
                     if(calendar.get(Calendar.MINUTE)<10){
-                        holder.alarmTimeTv.setText("Time: " + calendar.get(Calendar.HOUR) + ":0" + calendar.get(Calendar.MINUTE) + " " + ap);
+                        holder.alarmTimeTv.setText("Time: " + hour + ":0" + calendar.get(Calendar.MINUTE) + " " + ap);
                     }
                     else {
-                        holder.alarmTimeTv.setText("Time: " + calendar.get(Calendar.HOUR) + ":" + calendar.get(Calendar.MINUTE) + " " + ap);
-                    }                }
+                        holder.alarmTimeTv.setText("Time: " + hour + ":" + calendar.get(Calendar.MINUTE) + " " + ap);
+                    }
+                }
                 else {
                     holder.notifyCB.setSelected(false);
                     holder.enableCB.setChecked(false);

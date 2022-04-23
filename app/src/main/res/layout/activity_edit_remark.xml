@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".EditRemarkActivity"
+    tools:context=".Activities.EditRemarkActivity"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -135,6 +135,17 @@
                 android:text="Time: " />
         </LinearLayout>
 
+        <Button
+            android:id="@+id/clearbutton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Clear all"
+            android:onClick="clear"
+            android:layout_marginTop="10dp"
+            android:textAllCaps="false"
+            android:backgroundTint="@color/bgColor"
+            android:textColor="@color/iconColor"/>
     </LinearLayout>
     <LinearLayout
         android:id="@+id/bottomLL"

@@ -19,6 +19,7 @@
 <!--    <color name="tvBorder">@color/teal_700</color>-->
     <color name="iconColor">#FFF</color>
     <color name="toolbarColor">#212121</color>
+    <color name="bgColor">@color/cardview_dark_background</color>
     <style name="SplashScreen" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:windowBackground">@drawable/splash_screen_bg</item>
         <item name="android:windowFullscreen">true</item>

@@ -1,7 +1,9 @@
 package com.app.contactappsp.Adapters;
 
 import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.os.AsyncTask;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +16,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.app.contactappsp.Models.MyRemarkDetails;
 import com.app.contactappsp.R;
+import com.app.contactappsp.Utils.AMInterstitialAds;
+import com.app.contactappsp.Utils.Constants;
+import com.app.contactappsp.Utils.NetUtils;
+import com.app.contactappsp.Utils.interfacess.onInterstitialAdsClose;
 
 import java.util.Calendar;
 import java.util.List;
@@ -23,10 +29,12 @@ public class RemarkAdapter extends RecyclerView.Adapter<RemarkAdapter.RemarkView
     private Context mContext;
     private OnItemClickListener mListener;
     String[] monthName = {"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
+    AMInterstitialAds amInterstitialAds;
 
     public RemarkAdapter(List<MyRemarkDetails> contactVOList, Context mContext) {
         this.contactVOList = contactVOList;
         this.mContext = mContext;
+        amInterstitialAds = new AMInterstitialAds(mContext, true);
     }
 
     @Override
@@ -44,10 +52,15 @@ public class RemarkAdapter extends RecyclerView.Adapter<RemarkAdapter.RemarkView
             if (contactVOList.get(position) != null) {
 //            if (contactVOList.get(position).getId().equals(String.valueOf(position))) {
                 MyRemarkDetails contactVO = contactVOList.get(position);
-                holder.descriptionTv.setText(contactVO.getDescription());
-                holder.remark1Tv.setText(contactVO.getRemark1());
-                holder.remark2Tv.setText(contactVO.getRemark2());
-
+                if (!contactVO.getDescription().trim().equals("")) {
+                    holder.descriptionTv.setText(contactVO.getDescription());
+                }
+                if (!contactVO.getRemark1().trim().equals("")) {
+                    holder.remark1Tv.setText(contactVO.getRemark1());
+                }
+                if (!contactVO.getRemark2().trim().equals("")) {
+                    holder.remark2Tv.setText(contactVO.getRemark2());
+                }
                 String dateTemp = contactVO.getDate();
                 if (!dateTemp.trim().equals("")) {
                     Calendar calendar = Calendar.getInstance();
@@ -69,11 +82,15 @@ public class RemarkAdapter extends RecyclerView.Adapter<RemarkAdapter.RemarkView
                     } else {
                         ap = "PM";
                     }
+                    int hour =  calendar.get(Calendar.HOUR);
+                    if(calendar.get(Calendar.HOUR)==0){
+                        hour = 12;
+                    }
                     holder.alarmDateTv.setText("Date: " + calendar.get(Calendar.DAY_OF_MONTH) + " " + monthName[calendar.get(Calendar.MONTH)] + " " + (calendar.get(Calendar.YEAR) % 100));
                     if (calendar.get(Calendar.MINUTE) < 10) {
-                        holder.alarmTimeTv.setText("Time: " + calendar.get(Calendar.HOUR) + ":0" + calendar.get(Calendar.MINUTE) + " " + ap);
+                        holder.alarmTimeTv.setText("Time: " + hour + ":0" + calendar.get(Calendar.MINUTE) + " " + ap);
                     } else {
-                        holder.alarmTimeTv.setText("Time: " + calendar.get(Calendar.HOUR) + ":" + calendar.get(Calendar.MINUTE) + " " + ap);
+                        holder.alarmTimeTv.setText("Time: " + hour + ":" + calendar.get(Calendar.MINUTE) + " " + ap);
                     }
                 } else {
                     holder.notifyCB.setSelected(false);
@@ -134,11 +151,84 @@ public class RemarkAdapter extends RecyclerView.Adapter<RemarkAdapter.RemarkView
         @Override
         public boolean onLongClick(View v) {
             int position = getAdapterPosition();
-            if (mListener != null) {
-                if (position != RecyclerView.NO_POSITION) {
-                    mListener.setOnRemarkLongClickListener(position);
+            if (amInterstitialAds != null && NetUtils.isOnline(mContext) && !Constants.is_remarkAd_shown) {
+                if (amInterstitialAds.isLoaded()) {
+                    new AsyncTask<Void, Void, Void>() {
+                        ProgressDialog dialog = new ProgressDialog(mContext);
+
+                        @SuppressLint("StaticFieldLeak")
+                        @Override
+                        protected void onPreExecute() {
+                            super.onPreExecute();
+
+                            dialog.setTitle("Showing Ads");
+                            dialog.setMessage("Please Wait...");
+                            dialog.setCancelable(false);
+                            dialog.show();
+                        }
+
+
+                        @Override
+                        protected Void doInBackground(Void... params) {
+                            try {
+                                Thread.sleep(500);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            return null;
+                        }
+
+                        @Override
+                        protected void onPostExecute(Void aVoid) {
+                            super.onPostExecute(aVoid);
+
+                            if (dialog != null && dialog.isShowing()) {
+                                dialog.dismiss();
+                            }
+
+
+                            //Show Ads Here
+                            try {
+                                if (amInterstitialAds != null) {
+                                    amInterstitialAds.showFullScreenAds(new onInterstitialAdsClose() {
+                                        public void onAdClosed() {
+
+                                            Constants.is_remarkAd_shown = true;
+                                            if (mListener != null) {
+                                                if (position != RecyclerView.NO_POSITION) {
+                                                    mListener.setOnRemarkLongClickListener(position);
+                                                }
+                                            }
+
+
+                                        }
+                                    });
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+
+                        }
+                    }.execute();
+
+                } else {
+                    //Start Activity Here When Ads Not Loaded
+                    if (mListener != null) {
+                        if (position != RecyclerView.NO_POSITION) {
+                            mListener.setOnRemarkLongClickListener(position);
+                        }
+                    }
                 }
             }
+            else {
+                //Start Activity Here When Offline
+                if (mListener != null) {
+                    if (position != RecyclerView.NO_POSITION) {
+                        mListener.setOnRemarkLongClickListener(position);
+                    }
+                }
+            }
+
             return false;
         }
     }

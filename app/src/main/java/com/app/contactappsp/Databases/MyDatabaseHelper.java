@@ -12,7 +12,7 @@ import androidx.annotation.Nullable;
 
 public class MyDatabaseHelper extends SQLiteOpenHelper {
     String TAG = "MyDatabaseHelper";
-    private static int DB_VERSION = 1;
+    private static int DB_VERSION = 2;
     private static String DATABASE_NAME = "ContactsNotDB";
     public static String TABLE1_NAME = "EventTable";
     public static String KEY_ID = "id";
@@ -25,8 +25,9 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
     public static String ROW = "row_index";
     public static String DATE = "date";
     public static String STATUS = "status";
+    public static String CONTACT_NAME = "contact_name";
 
-    private static String CREATE_TABLE1 = "CREATE TABLE "+TABLE1_NAME+"("+KEY_ID+" INTEGER PRIMARY KEY AUTOINCREMENT,"+CONTACT_ID+" VARCHAR(500),"+EVENT+" VARCHAR(500),"+ROW+" VARCHAR(500),"+DES+" VARCHAR(500),"+REM_1+" VARCHAR(500),"+REM_2+" VARCHAR(500),"+NOTIFY+" VARCHAR(500),"+DATE+" VARCHAR(500),"+STATUS+" VARCHAR(500) );";
+    private static String CREATE_TABLE1 = "CREATE TABLE "+TABLE1_NAME+"("+KEY_ID+" INTEGER PRIMARY KEY AUTOINCREMENT,"+CONTACT_ID+" VARCHAR(500),"+EVENT+" VARCHAR(500),"+ROW+" VARCHAR(500),"+DES+" VARCHAR(500),"+REM_1+" VARCHAR(500),"+REM_2+" VARCHAR(500),"+NOTIFY+" VARCHAR(500),"+DATE+" VARCHAR(500),"+STATUS+" VARCHAR(500),"+CONTACT_NAME+" VARCHAR(500) );";
     private static String READ_EVENT_1 = "";
 
     private Context context;
@@ -60,7 +61,7 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
     }
 
 
-    public long insertDetailsData(String event,String row,String contactId,String description, String remark1, String remark2,String notify, String date, String status)
+    public long insertDetailsData(String event,String row,String contactId,String description, String remark1, String remark2,String notify, String date, String status,String contact_name)
     {
         SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
@@ -73,8 +74,9 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
         contentValues.put(NOTIFY,notify);
         contentValues.put(DATE,date);
         contentValues.put(STATUS,status);
-        return sqLiteDatabase.insert(TABLE1_NAME,null,contentValues);
-
+        contentValues.put(CONTACT_NAME,contact_name);
+        long ret = sqLiteDatabase.insert(TABLE1_NAME,null,contentValues);
+        return ret;
     }
 
     public Cursor read_event_1(String contactId) {
@@ -95,7 +97,7 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
         return cursor;
     }
 
-    public boolean updateData(String id, String description, String remark1, String remark2, String date, String status)
+    public boolean updateData(String id, String description, String remark1, String remark2, String date, String status, String contact_name)
     {
 
         SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
@@ -106,6 +108,7 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
         contentValues.put(REM_2,remark2);
         contentValues.put(DATE,date);
         contentValues.put(STATUS,status);
+        contentValues.put(CONTACT_NAME,contact_name);
 
         int i = sqLiteDatabase.update(TABLE1_NAME,contentValues,KEY_ID+" = ?",new String[]{id});
         return i != 0;

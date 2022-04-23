@@ -13,6 +13,7 @@ import android.widget.TextView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.app.contactappsp.Activities.ContactDetailsActivity;
 import com.app.contactappsp.Adapters.ContactAdapter;
 import com.app.contactappsp.Databases.DbHelper;
 import com.app.contactappsp.Listener.ContactClickListner;
@@ -24,7 +25,7 @@ import java.util.Comparator;
 
 import in.myinnos.alphabetsindexfastscrollrecycler.IndexFastScrollRecyclerView;
 
-import static com.app.contactappsp.MainActivity.no_of_contact;
+import static com.app.contactappsp.Activities.MainActivity.no_of_contact;
 
 public class ContactListFragment extends Fragment implements ContactClickListner {
 
